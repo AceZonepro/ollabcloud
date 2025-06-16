@@ -3,148 +3,126 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Reddit Style Forum</title>
-  <style>
-    :root {
-      --bg-color: #f6f7f8;
-      --text-color: #1c1c1c;
-      --card-bg: #ffffff;
-    }
-
-    body.dark-mode {
-      --bg-color: #1a1a1b;
-      --text-color: #d7dadc;
-      --card-bg: #272729;
-    }
-
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background-color: var(--bg-color);
-      color: var(--text-color);
-    }
-
-    .navbar {
-      background-color: #ff4500;
-      padding: 1rem;
-      color: white;
-      display: flex;
-      justify-content: space-between;
-    }
-
-    .container {
-      display: flex;
-      margin: 2rem;
-    }
-
-    .form {
-      flex: 1;
-      margin-right: 2rem;
-    }
-
-    .posts {
-      flex: 2;
-    }
-
-    .post {
-      background-color: var(--card-bg);
-      padding: 1rem;
-      border-radius: 8px;
-      margin-bottom: 1rem;
-    }
-
-    .post img, .post video {
-      max-width: 100%;
-      margin-top: 0.5rem;
-    }
-
-    .post-controls {
-      display: flex;
-      gap: 1rem;
-      margin-top: 0.5rem;
-    }
-
-    button {
-      cursor: pointer;
-    }
-  </style>
+  <title>Reddit Style App</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-storage-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
 </head>
-<body>
-  <div class="navbar">
-    <div>Reddit Clone</div>
-    <button onclick="toggleMode()">Toggle Dark/Light Mode</button>
-  </div>
-
-  <div class="container">
-    <div class="form">
-      <input type="text" id="topic" placeholder="Topic" /><br /><br />
-      <textarea id="content" placeholder="What's on your mind?"></textarea><br /><br />
-      <input type="file" id="media" accept="image/*,video/*" /><br /><br />
-      <button onclick="addPost()">Post</button>
+<body class="bg-white text-black dark:bg-gray-900 dark:text-white min-h-screen">
+  <div class="max-w-2xl mx-auto p-4">
+    <div class="flex justify-between items-center">
+      <h1 class="text-3xl font-bold">Reddit Clone</h1>
+      <button id="toggleMode" class="px-4 py-2 border rounded">🌗</button>
     </div>
-    <div class="posts" id="posts"></div>
+    <div class="my-4">
+      <input id="username" class="w-full mb-2 p-2 border rounded" placeholder="Enter username" />
+      <input id="topic" class="w-full mb-2 p-2 border rounded" placeholder="Topic" />
+      <textarea id="message" class="w-full mb-2 p-2 border rounded" rows="3" placeholder="What's on your mind?"></textarea>
+      <input type="file" id="media" accept="image/*,video/*" class="mb-2" />
+      <button id="send" class="px-4 py-2 bg-blue-500 text-white rounded">Post</button>
+    </div>
+    <div id="posts"></div>
   </div>
-
   <script>
-    function toggleMode() {
-      document.body.classList.toggle("dark-mode");
+    const firebaseConfig = {
+      apiKey: "AIzaSyA_OT62IGPCaueoFN7yQP1EmeR1Yem4FW8",
+      authDomain: "collabcloud-f0ed5.firebaseapp.com",
+      databaseURL: "https://collabcloud-f0ed5-default-rtdb.firebaseio.com",
+      projectId: "collabcloud-f0ed5",
+      storageBucket: "collabcloud-f0ed5.appspot.com",
+      messagingSenderId: "490023921099",
+      appId: "1:490023921099:web:dummy",
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const storage = firebase.storage();
+
+    const postsContainer = document.getElementById("posts");
+    const sendBtn = document.getElementById("send");
+    const messageInput = document.getElementById("message");
+    const usernameInput = document.getElementById("username");
+    const topicInput = document.getElementById("topic");
+    const mediaInput = document.getElementById("media");
+
+    // Dark mode toggle
+    const toggleBtn = document.getElementById("toggleMode");
+    toggleBtn.onclick = () => {
+      document.body.classList.toggle("dark");
+      localStorage.setItem("darkMode", document.body.classList.contains("dark"));
+    };
+    if (localStorage.getItem("darkMode") === "true") {
+      document.body.classList.add("dark");
     }
 
-    function addPost() {
-      const topic = document.getElementById("topic").value.trim();
-      const content = document.getElementById("content").value.trim();
-      const media = document.getElementById("media").files[0];
+    // Load username
+    usernameInput.value = localStorage.getItem("username") || "";
+    usernameInput.oninput = () => {
+      localStorage.setItem("username", usernameInput.value);
+    };
 
-      if (!content) return;
+    sendBtn.onclick = async () => {
+      const text = messageInput.value;
+      const username = usernameInput.value || "Anonymous";
+      const topic = topicInput.value;
+      const file = mediaInput.files[0];
+      let mediaUrl = "";
 
-      const postDiv = document.createElement("div");
-      postDiv.className = "post";
-
-      const topicElem = topic ? `<h4>${topic}</h4>` : "";
-      postDiv.innerHTML = `${topicElem}<p>${content}</p>`;
-
-      if (media) {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-          const src = e.target.result;
-          if (media.type.startsWith("video")) {
-            postDiv.innerHTML += `<video controls src="${src}"></video>`;
-          } else if (media.type.startsWith("image")) {
-            postDiv.innerHTML += `<img src="${src}" alt="Media" />`;
-          }
-        };
-        reader.readAsDataURL(media);
+      if (file) {
+        const storageRef = storage.ref(`media/${Date.now()}_${file.name}`);
+        await storageRef.put(file);
+        mediaUrl = await storageRef.getDownloadURL();
       }
 
-      const controls = document.createElement("div");
-      controls.className = "post-controls";
+      const postId = db.ref("posts").push().key;
+      await db.ref("posts/" + postId).set({
+        id: postId,
+        username,
+        text,
+        topic,
+        mediaUrl,
+        mediaType: file ? file.type : "",
+        timestamp: Date.now(),
+      });
 
-      const editBtn = document.createElement("button");
-      editBtn.textContent = "Edit";
-      editBtn.onclick = function () {
-        const newText = prompt("Edit your post:", content);
-        if (newText !== null) {
-          postDiv.querySelector("p").textContent = newText;
-        }
-      };
+      messageInput.value = "";
+      topicInput.value = "";
+      mediaInput.value = "";
+    };
 
-      const deleteBtn = document.createElement("button");
-      deleteBtn.textContent = "Delete";
-      deleteBtn.onclick = function () {
-        postDiv.remove();
-      };
+    db.ref("posts").on("value", (snapshot) => {
+      postsContainer.innerHTML = "";
+      const posts = snapshot.val();
+      if (!posts) return;
+      Object.values(posts).sort((a, b) => b.timestamp - a.timestamp).forEach(post => {
+        const div = document.createElement("div");
+        div.className = "bg-gray-100 dark:bg-gray-800 p-4 rounded mb-4";
+        div.innerHTML = `
+          <div class="text-sm text-gray-600">${post.username} • ${new Date(post.timestamp).toLocaleString()}</div>
+          <div class="font-bold text-xl mt-1">${post.topic || "(No Topic)"}</div>
+          <div class="mt-2">${post.text}</div>
+          ${post.mediaUrl ? (post.mediaType.includes("image") ? `<img src="${post.mediaUrl}" class="mt-2 max-w-full rounded">` : `<video controls src="${post.mediaUrl}" class="mt-2 max-w-full rounded"></video>`) : ""}
+          ${post.username === usernameInput.value ? `
+          <div class="flex space-x-2 mt-2">
+            <button onclick="editPost('${post.id}')" class="text-blue-500">Edit</button>
+            <button onclick="deletePost('${post.id}')" class="text-red-500">Delete</button>
+          </div>` : ""}
+        `;
+        postsContainer.appendChild(div);
+      });
+    });
 
-      controls.appendChild(editBtn);
-      controls.appendChild(deleteBtn);
-      postDiv.appendChild(controls);
+    window.editPost = async (id) => {
+      const post = (await db.ref("posts/" + id).get()).val();
+      messageInput.value = post.text;
+      topicInput.value = post.topic;
+      deletePost(id);
+    };
 
-      document.getElementById("posts").prepend(postDiv);
-
-      // Reset form
-      document.getElementById("topic").value = "";
-      document.getElementById("content").value = "";
-      document.getElementById("media").value = "";
-    }
+    window.deletePost = async (id) => {
+      await db.ref("posts/" + id).remove();
+    };
   </script>
 </body>
 </html>
