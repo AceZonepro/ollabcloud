@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CollabCloud</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+    body {
+      background-color: #f0f2f5;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #0078d4;
+      padding: 10px 20px;
+      color: white;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+    }
+    .logo img {
+      height: 40px;
+      margin-right: 10px;
+    }
+    .profile-area {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .profile-area img {
+      height: 40px;
+      width: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      cursor: pointer;
+    }
+    .menu {
+      position: relative;
+    }
+    .menu-btn {
+      font-size: 24px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      color: white;
+    }
+    .dropdown {
+      position: absolute;
+      top: 40px;
+      right: 0;
+      background-color: white;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 10px;
+      display: none;
+      flex-direction: column;
+      z-index: 1000;
+    }
+    .dropdown input[type="text"] {
+      padding: 5px;
+      margin-bottom: 10px;
+      width: 200px;
+    }
+    .dropdown button {
+      padding: 5px;
+      background-color: #0078d4;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 3px;
+    }
+    main {
+      padding: 20px;
+    }
+    .message-container {
+      background-color: white;
+      border-radius: 10px;
+      padding: 20px;
+      max-width: 100%;
+      width: 100%;
+      height: calc(100vh - 100px);
+      overflow-y: auto;
+      margin: 0 auto;
+    }
+    .message-container input,
+    .message-container textarea {
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    .message-container button {
+      padding: 10px 15px;
+      background-color: #0078d4;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .links {
+      margin-top: 20px;
+      display: flex;
+      gap: 10px;
+    }
+    .links a {
+      color: #0078d4;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .message-list {
+      margin-top: 20px;
+    }
+    .message-item {
+      background-color: #eef6ff;
+      padding: 10px;
+      border-radius: 5px;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <img src="logo.png" alt="Logo" />
+      <h1>CollabCloud</h1>
+    </div>
+    <div class="profile-area">
+      <img id="profilePic" src="https://via.placeholder.com/40" alt="Profile" onclick="document.getElementById('fileInput').click();" />
+      <span id="displayUsername"></span>
+      <input type="file" id="fileInput" accept="image/*" style="display: none" onchange="uploadProfilePic(event)" />
+      <div class="menu">
+        <button class="menu-btn" onclick="toggleDropdown()">☰</button>
+        <div class="dropdown" id="dropdownMenu">
+          <input type="text" id="usernameInput" placeholder="Enter Username" />
+          <button onclick="saveUsername()">Save</button>
+        </div>
+      </div>
+    </div>
+  </header>
+  <main>
+    <div class="message-container">
+      <input type="text" id="topicInput" placeholder="Enter Topic" />
+      <textarea id="textInput" placeholder="Enter Message" rows="5"></textarea>
+      <button onclick="addMessage()">Add Text</button>
+      <div class="message-list" id="messageList"></div>
+      <div class="links">
+        <a href="https://discord.gg/MEMMyRQJA9" target="_blank">Discord</a>
+        <a href="https://www.reddit.com/r/IBO/" target="_blank">Reddit</a>
+      </div>
+    </div>
+  </main>
+  <script>
+    function toggleDropdown() {
+      const dropdown = document.getElementById("dropdownMenu");
+      dropdown.style.display = dropdown.style.display === "flex" ? "none" : "flex";
+    }
+
+    function saveUsername() {
+      const username = document.getElementById("usernameInput").value;
+      localStorage.setItem("username", username);
+      document.getElementById("displayUsername").innerText = username;
+      toggleDropdown();
+    }
+
+    function uploadProfilePic(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const img = document.getElementById("profilePic");
+          img.src = e.target.result;
+          localStorage.setItem("profilePic", e.target.result);
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function addMessage() {
+      const topic = document.getElementById("topicInput").value;
+      const text = document.getElementById("textInput").value;
+      const username = localStorage.getItem("username") || "Anonymous";
+      if (topic && text) {
+        const messageItem = document.createElement("div");
+        messageItem.className = "message-item";
+        messageItem.innerHTML = `<strong>${topic}</strong> by ${username}<br>${text}`;
+        document.getElementById("messageList").appendChild(messageItem);
+        document.getElementById("topicInput").value = "";
+        document.getElementById("textInput").value = "";
+      }
+    }
+
+    window.onload = function () {
+      const savedPic = localStorage.getItem("profilePic");
+      const savedUsername = localStorage.getItem("username");
+      if (savedPic) {
+        document.getElementById("profilePic").src = savedPic;
+      }
+      if (savedUsername) {
+        document.getElementById("displayUsername").innerText = savedUsername;
+      }
+    };
+  </script>
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyA_OT62IGPCaueoFN7yQP1EmeR1Yem4FW8",
+    authDomain: "collabcloud-f0ed5.firebaseapp.com",
+    databaseURL: "https://collabcloud-f0ed5-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "collabcloud-f0ed5",
+    storageBucket: "collabcloud-f0ed5.appspot.com",
+    messagingSenderId: "490023921099",
+    appId: "1:490023921099:web:YOUR_APP_ID"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const messagesRef = ref(db, 'messages');
+
+  window.onload = function () {
+    const savedPic = localStorage.getItem("profilePic");
+    const savedUsername = localStorage.getItem("username");
+    if (savedPic) {
+      document.getElementById("profilePic").src = savedPic;
+    }
+    if (savedUsername) {
+      document.getElementById("displayUsername").innerText = savedUsername;
+    }
+  };
+
+  window.toggleDropdown = function () {
+    const dropdown = document.getElementById("dropdownMenu");
+    dropdown.style.display = dropdown.style.display === "flex" ? "none" : "flex";
+  };
+
+  window.saveUsername = function () {
+    const username = document.getElementById("usernameInput").value;
+    localStorage.setItem("username", username);
+    document.getElementById("displayUsername").innerText = username;
+    toggleDropdown();
+  };
+
+  window.uploadProfilePic = function (event) {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const img = document.getElementById("profilePic");
+        img.src = e.target.result;
+        localStorage.setItem("profilePic", e.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  window.addMessage = function () {
+    const topic = document.getElementById("topicInput").value;
+    const text = document.getElementById("textInput").value;
+    const username = localStorage.getItem("username") || "Anonymous";
+    if (topic && text) {
+      push(messagesRef, {
+        topic,
+        text,
+        username,
+        timestamp: Date.now()
+      });
+      document.getElementById("topicInput").value = "";
+      document.getElementById("textInput").value = "";
+    }
+  };
+
+  onChildAdded(messagesRef, (data) => {
+    const msg = data.val();
+    const messageItem = document.createElement("div");
+    messageItem.className = "message-item";
+    messageItem.innerHTML = `<strong>${msg.topic}</strong> by ${msg.username}<br>${msg.text}`;
+    document.getElementById("messageList").appendChild(messageItem);
+  });
+</script>
+</body>
+</html>
+
