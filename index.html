@@ -139,42 +139,37 @@
       <span id="displayUsername"></span>
       <input type="file" id="fileInput" accept="image/*" style="display: none" onchange="uploadProfilePic(event)" />
       <div class="menu">
-        <button class="menu-btn" onclick="toggleDropdown()">☰</button>
+  <button class="menu-btn" onclick="toggleDropdown()">☰</button>
   <div class="dropdown" id="dropdownMenu">
-  <input type="text" id="usernameInput" placeholder="Enter Username" />
-  <button onclick="saveUsername()">Save</button>
+    <div class="dropdown-section">
+      <label for="usernameInput"><strong>Username</strong></label>
+      <input type="text" id="usernameInput" placeholder="Enter Username" />
+      <button onclick="saveUsername()">Save</button>
+    </div>
 
-  <hr style="margin: 10px 0;" />
+    <hr style="margin: 10px 0;" />
 
-  <div style="text-align: left; font-size: 14px;">
-  <div class="dropdown" id="dropdownMenu">
-  <div class="dropdown-section">
-    <label for="usernameInput"><strong>Username</strong></label>
-    <input type="text" id="usernameInput" placeholder="Enter Username" />
-    <button onclick="saveUsername()">Save</button>
-  </div>
+    <div class="dropdown-section">
+      <h3 style="margin-bottom: 5px;">Welcome to <span style="color: #0078d4;">CollabCloud</span></h3>
+      <p style="font-size: 14px;">
+        CollabCloud is an unofficial website for everything concerning the International Baccalaureate. It helps students and educators collaborate in virtual classrooms and online communities.
+      </p>
 
-  <hr />
+      <h4 style="margin-top: 10px;">🌟 Features</h4>
+      <ul style="font-size: 14px; padding-left: 20px;">
+        <li>✔ Connect with IB learners globally</li>
+        <li>✔ Join Discord communities for help</li>
+        <li>✔ Stay updated with tips & news</li>
+      </ul>
 
-  <div class="dropdown-section">
-    <h3>Welcome to <span style="color: #0078d4;">CollabCloud</span></h3>
-    <p style="font-size: 14px; margin-top: 5px;">
-      CollabCloud is an unofficial website for everything concerning the International Baccalaureate. It helps students and educators collaborate in virtual classrooms and online communities.
-    </p>
-
-    <h4 style="margin-top: 10px;">🌟 Features</h4>
-    <ul style="font-size: 14px; padding-left: 20px; margin-top: 5px;">
-      <li>✔ Connect with IB learners globally</li>
-      <li>✔ Join Discord communities for help</li>
-      <li>✔ Stay updated with tips & news</li>
-    </ul>
-
-    <h4 style="margin-top: 10px;">📚 About</h4>
-    <p style="font-size: 14px; margin-top: 5px;">
-      Virtual classrooms connect students worldwide and provide access to vital learning tools. CollabCloud solves challenges like lack of interaction using online tools and communities.
-    </p>
+      <h4 style="margin-top: 10px;">📚 About</h4>
+      <p style="font-size: 14px;">
+        Virtual classrooms connect students worldwide and provide access to vital learning tools. CollabCloud solves challenges like lack of interaction using online tools and communities.
+      </p>
+    </div>
   </div>
 </div>
+
 
 
       </div>
