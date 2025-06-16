@@ -13,9 +13,9 @@
     .profile-area { display: flex; align-items: center; gap: 10px; }
     .profile-area img { height: 40px; width: 40px; border-radius: 50%; cursor: pointer; }
     .dark-toggle { font-size: 20px; background: white; border-radius: 50%; padding: 6px; cursor: pointer; }
-    main { margin: 20px auto; padding: 20px; max-width: 800px; background: #fff; border-radius: 10px; }
+    main { margin: 20px auto; padding: 20px; max-width: 800px; background: #fff; border-radius: 10px; text-align: left; }
     body.dark main { background: #333; }
-    select, input[type="text"], textarea, button { margin-bottom: 10px; padding: 10px; border-radius: 5px; width: 100%; }
+    input[type="text"], textarea, button { margin-bottom: 10px; padding: 10px; border-radius: 5px; width: 100%; }
     button { background: #0078d4; color: #fff; border: none; cursor: pointer; }
     .message { background: #eef6ff; padding: 10px; border-radius: 6px; margin-top: 10px; position: relative; }
     body.dark .message { background: #2c2c2c; }
@@ -43,9 +43,6 @@
   </header>
 
   <main>
-    <select id="topicSelect">
-      <option value="">-- Select Topic --</option>
-    </select>
     <input type="text" id="newTopicInput" placeholder="Add new topic" />
     <button onclick="addTopic()">Add Topic</button>
 
@@ -56,7 +53,7 @@
     <div id="messages"></div>
   </main>
 
-  <!-- Firebase SDK -->
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
@@ -71,13 +68,15 @@
       messagingSenderId: "490023921099",
       appId: "1:490023921099:web:YOUR_APP_ID"
     };
+
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     const storage = firebase.storage();
 
+    let currentTopic = "default"; // Default topic name
+
     const displayUsername = document.getElementById("displayUsername");
     const usernameEditor = document.getElementById("usernameEditor");
-    const topicSelect = document.getElementById("topicSelect");
 
     displayUsername.addEventListener("click", () => {
       usernameEditor.value = displayUsername.textContent;
@@ -100,26 +99,23 @@
     }
 
     function addTopic() {
-      const newTopic = document.getElementById("newTopicInput").value.trim();
-      if (!newTopic) return;
-      const option = new Option(newTopic, newTopic);
-      topicSelect.appendChild(option);
-      topicSelect.value = newTopic;
-      document.getElementById("newTopicInput").value = "";
+      const input = document.getElementById("newTopicInput");
+      const topic = input.value.trim();
+      if (!topic) return;
+      currentTopic = topic;
+      input.value = "";
       loadMessages();
     }
 
     function sendMessage() {
-      const topic = topicSelect.value;
       const text = document.getElementById("msgInput").value.trim();
       const file = document.getElementById("fileMedia").files[0];
       const username = localStorage.getItem("username") || "Anonymous";
 
-      if (!topic) return alert("Please select or create a topic first.");
+      if (!currentTopic) return alert("Add a topic first.");
       if (!text && !file) return alert("Type a message or attach a file.");
 
       const message = { username, timestamp: Date.now() };
-
       if (text) message.text = text;
 
       if (file) {
@@ -128,10 +124,10 @@
         ref.put(file).then(() => ref.getDownloadURL()).then(url => {
           message.mediaUrl = url;
           message.mediaType = file.type.split('/')[0];
-          db.ref(`messages/${topic}`).push(message);
+          db.ref(`messages/${currentTopic}`).push(message);
         });
       } else {
-        db.ref(`messages/${topic}`).push(message);
+        db.ref(`messages/${currentTopic}`).push(message);
       }
 
       document.getElementById("msgInput").value = "";
@@ -139,10 +135,9 @@
     }
 
     function loadMessages() {
-      const topic = topicSelect.value;
-      if (!topic) return;
+      if (!currentTopic) return;
 
-      db.ref(`messages/${topic}`).on("value", snap => {
+      db.ref(`messages/${currentTopic}`).on("value", snap => {
         const container = document.getElementById("messages");
         container.innerHTML = "";
         const messages = snap.val() || {};
@@ -154,8 +149,8 @@
             ${m.mediaUrl ? (m.mediaType === "image" ? `<img src="${m.mediaUrl}" class="attached"/>` :
               `<video src="${m.mediaUrl}" controls class="attached"></video>`) : ""}
             <div class="actions">
-              <button onclick="editMessage('${topic}','${id}','${(m.text || '').replace(/'/g, "\\'")}')">Edit</button>
-              <button onclick="deleteMessage('${topic}','${id}')">Delete</button>
+              <button onclick="editMessage('${currentTopic}','${id}','${(m.text || '').replace(/'/g, "\\'")}')">Edit</button>
+              <button onclick="deleteMessage('${currentTopic}','${id}')">Delete</button>
             </div>
           `;
           container.appendChild(div);
@@ -191,8 +186,6 @@
       };
       reader.readAsDataURL(file);
     });
-
-    topicSelect.addEventListener("change", loadMessages);
 
     window.onload = () => {
       displayUsername.textContent = localStorage.getItem("username") || "Anonymous";
