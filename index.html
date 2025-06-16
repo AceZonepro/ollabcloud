@@ -1,87 +1,74 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>CollabCloud</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
-    body { background: #f6f7f8; color: #1c1c1c; transition: background 0.3s, color 0.3s; }
-    body.dark { background: #1a1a1a; color: #eaeaea; }
+    body { background: #f0f2f5; color: #000; transition: background 0.3s, color 0.3s; }
+    body.dark { background: #1e1e1e; color: #fff; }
 
-    header {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 10px 20px; background: #0078d4; color: #fff;
-    }
-    .logo h1 { font-size: 24px; }
-    .profile {
-      display: flex; align-items: center; gap: 10px;
-    }
-    .profile img {
-      height: 40px; width: 40px; border-radius: 50%; cursor: pointer;
-    }
-    .dark-toggle {
-      font-size: 18px; background: white; border-radius: 50%; padding: 6px; cursor: pointer; border: none;
-    }
+    header { display: flex; justify-content: space-between; align-items: center; background: #0078d4; padding: 10px 20px; color: #fff; }
+    .logo { display: flex; align-items: center; gap: 10px; }
+    .logo img { height: 40px; }
+    .profile-area { display: flex; align-items: center; gap: 10px; }
+    .profile-area img { height: 40px; width: 40px; border-radius: 50%; cursor: pointer; }
+    .dark-toggle { font-size: 20px; background: white; border-radius: 50%; padding: 6px; cursor: pointer; }
 
-    main {
-      max-width: 900px; margin: 20px auto; display: flex; gap: 20px;
-    }
-    .left-panel {
-      flex: 1;
-    }
-    .right-panel {
-      flex: 2; display: flex; flex-direction: column; gap: 15px;
-    }
-    textarea, input[type="text"] {
-      width: 100%; padding: 10px; margin-bottom: 10px;
-      border: 1px solid #ccc; border-radius: 6px;
-    }
-    button {
-      padding: 10px 15px; border: none; border-radius: 6px;
-      background: #0078d4; color: white; cursor: pointer;
-    }
+    main { display: flex; justify-content: flex-start; gap: 20px; padding: 20px; max-width: 1200px; margin: auto; }
+    .left-panel { width: 300px; }
+    .right-panel { flex: 1; }
+    .post-box, .message { background: #fff; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
+    body.dark .post-box, body.dark .message { background: #333; }
 
-    .post {
-      background: #fff; padding: 15px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-    body.dark .post { background: #2c2c2c; }
-    .post .meta { font-size: 12px; color: gray; }
-    .post .actions { margin-top: 8px; }
-    .post .actions button { background: none; color: #0078d4; font-size: 12px; padding: 4px; }
-    img.media, video.media { max-width: 100%; margin-top: 10px; border-radius: 6px; }
+    input[type="text"], textarea, button { width: 100%; padding: 10px; border-radius: 5px; margin-top: 10px; }
+    button { background: #0078d4; color: #fff; border: none; cursor: pointer; }
+
+    .message { position: relative; }
+    .actions { position: absolute; top: 10px; right: 10px; }
+    .actions button { background: transparent; color: #0078d4; border: none; cursor: pointer; margin-left: 5px; }
+    img.attached, video.attached { max-width: 100%; margin-top: 10px; border-radius: 5px; display: block; }
+
+    #displayUsername { cursor: pointer; font-weight: bold; }
+    #usernameEditor { display: none; font-size: 16px; padding: 4px; border-radius: 4px; border: 1px solid #ccc; width: auto; }
   </style>
 </head>
 <body>
 
   <header>
     <div class="logo">
+      <img src="logo.png" alt="Logo" />
       <h1>CollabCloud</h1>
     </div>
-    <div class="profile">
-      <span id="usernameDisplay">Anonymous</span>
-      <input type="text" id="usernameInput" style="display:none;" />
-      <img src="https://via.placeholder.com/40" id="profilePic" />
-      <input type="file" id="uploadPic" accept="image/*" style="display:none;" />
+    <div class="profile-area">
+      <span id="displayUsername">Anonymous</span>
+      <input type="text" id="usernameEditor" />
+      <img id="profilePic" src="https://via.placeholder.com/40" />
+      <input type="file" id="filePic" accept="image/*" style="display: none;" />
       <button class="dark-toggle" onclick="toggleDarkMode()">🌓</button>
     </div>
   </header>
 
   <main>
     <div class="left-panel">
-      <input type="text" id="topicInput" placeholder="Enter topic..." />
-      <textarea id="messageInput" placeholder="Write your message..."></textarea>
-      <input type="file" id="mediaInput" accept="image/*,video/*" />
-      <button onclick="sendMessage()">Post</button>
+      <input type="text" id="newTopicInput" placeholder="Enter topic..." />
     </div>
-    <div class="right-panel" id="postContainer">
-      <!-- Posts appear here -->
+
+    <div class="right-panel">
+      <div class="post-box">
+        <textarea id="msgInput" placeholder="What's on your mind?"></textarea>
+        <input type="file" id="fileMedia" accept="image/*,video/*" />
+        <button onclick="sendMessage()">Post</button>
+      </div>
+      <div id="messages"></div>
     </div>
   </main>
 
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyA_OT62IGPCaueoFN7yQP1EmeR1Yem4FW8",
@@ -96,113 +83,74 @@
     const db = firebase.database();
     const storage = firebase.storage();
 
-    const usernameDisplay = document.getElementById("usernameDisplay");
-    const usernameInput = document.getElementById("usernameInput");
-    const profilePic = document.getElementById("profilePic");
+    const topicInput = document.getElementById("newTopicInput");
+    const msgInput = document.getElementById("msgInput");
+    const fileInput = document.getElementById("fileMedia");
+    const displayUsername = document.getElementById("displayUsername");
+    const usernameEditor = document.getElementById("usernameEditor");
 
-    usernameDisplay.onclick = () => {
-      usernameInput.value = usernameDisplay.textContent;
-      usernameDisplay.style.display = "none";
-      usernameInput.style.display = "inline";
-      usernameInput.focus();
-    }
-    usernameInput.onblur = saveUsername;
-    usernameInput.onkeydown = (e) => { if (e.key === "Enter") saveUsername(); };
+    let currentTopic = "default";
 
     function saveUsername() {
-      const name = usernameInput.value.trim() || "Anonymous";
+      const name = usernameEditor.value.trim() || "Anonymous";
       localStorage.setItem("username", name);
-      usernameDisplay.textContent = name;
-      usernameDisplay.style.display = "inline";
-      usernameInput.style.display = "none";
+      displayUsername.textContent = name;
+      displayUsername.style.display = "inline-block";
+      usernameEditor.style.display = "none";
     }
 
-    function toggleDarkMode() {
-      document.body.classList.toggle("dark");
-      localStorage.setItem("theme", document.body.classList.contains("dark") ? "dark" : "light");
-    }
+    displayUsername.addEventListener("click", () => {
+      usernameEditor.value = displayUsername.textContent;
+      displayUsername.style.display = "none";
+      usernameEditor.style.display = "inline-block";
+      usernameEditor.focus();
+    });
 
-    profilePic.onclick = () => document.getElementById("uploadPic").click();
-    document.getElementById("uploadPic").onchange = (e) => {
+    usernameEditor.addEventListener("blur", saveUsername);
+    usernameEditor.addEventListener("keydown", e => {
+      if (e.key === "Enter") saveUsername();
+    });
+
+    document.getElementById("profilePic").addEventListener("click", () => {
+      document.getElementById("filePic").click();
+    });
+
+    document.getElementById("filePic").addEventListener("change", e => {
       const file = e.target.files[0];
       if (!file) return;
       const reader = new FileReader();
-      reader.onload = e => {
-        profilePic.src = e.target.result;
-        localStorage.setItem("profilePic", e.target.result);
-      }
+      reader.onload = evt => {
+        const dataUrl = evt.target.result;
+        document.getElementById("profilePic").src = dataUrl;
+        localStorage.setItem("profilePic", dataUrl);
+      };
       reader.readAsDataURL(file);
-    }
+    });
 
     function sendMessage() {
+      const text = msgInput.value.trim();
+      const file = fileInput.files[0];
       const username = localStorage.getItem("username") || "Anonymous";
-      const topic = document.getElementById("topicInput").value.trim();
-      const text = document.getElementById("messageInput").value.trim();
-      const file = document.getElementById("mediaInput").files[0];
-
-      if (!topic) return alert("Topic required");
-      if (!text && !file) return alert("Message or media required");
-
-      const msg = { username, topic, timestamp: Date.now(), text };
-
-      const sendToDB = (data) => {
-        db.ref("posts").push(data);
-        document.getElementById("messageInput").value = "";
-        document.getElementById("mediaInput").value = "";
-      };
-
+      const topic = topicInput.value.trim() || "default";
+      if (!text && !file) return alert("Add text or a file");
+      const message = { username, timestamp: Date.now(), topic };
+      if (text) message.text = text;
       if (file) {
-        const ref = storage.ref(`media/${Date.now()}_${file.name}`);
+        const path = `media/${Date.now()}_${file.name}`;
+        const ref = storage.ref(path);
         ref.put(file).then(() => ref.getDownloadURL()).then(url => {
-          msg.mediaUrl = url;
-          msg.mediaType = file.type.split("/")[0];
-          sendToDB(msg);
+          message.mediaUrl = url;
+          message.mediaType = file.type.split('/')[0];
+          db.ref(`messages/${topic}`).push(message);
         });
-      } else sendToDB(msg);
+      } else {
+        db.ref(`messages/${topic}`).push(message);
+      }
+      msgInput.value = "";
+      fileInput.value = "";
     }
 
-    function loadPosts() {
-      db.ref("posts").on("value", snap => {
-        const container = document.getElementById("postContainer");
-        container.innerHTML = "";
-        const data = snap.val() || {};
-        Object.entries(data).sort((a, b) => b[1].timestamp - a[1].timestamp).forEach(([id, post]) => {
-          const div = document.createElement("div");
-          div.className = "post";
-          div.innerHTML = `
-            <div class="meta">Topic: <strong>${post.topic}</strong> by <em>${post.username}</em></div>
-            <div class="text">${post.text || ""}</div>
-            ${post.mediaUrl ?
-              (post.mediaType === "image" ? `<img src="${post.mediaUrl}" class="media">` :
-              `<video src="${post.mediaUrl}" class="media" controls></video>`) : ""}
-            ${post.username === (localStorage.getItem("username") || "Anonymous") ?
-              `<div class="actions">
-                <button onclick="editPost('${id}', '${(post.text || "").replace(/'/g, "\\'")}')">Edit</button>
-                <button onclick="deletePost('${id}')">Delete</button>
-              </div>` : ""}
-          `;
-          container.appendChild(div);
-        });
-      });
-    }
-
-    function editPost(id, currentText) {
-      const newText = prompt("Edit your message:", currentText);
-      if (newText !== null) db.ref("posts/" + id).update({ text: newText });
-    }
-
-    function deletePost(id) {
-      if (confirm("Delete this post?")) db.ref("posts/" + id).remove();
-    }
-
-    window.onload = () => {
-      const savedName = localStorage.getItem("username");
-      if (savedName) usernameDisplay.textContent = savedName;
-      const pic = localStorage.getItem("profilePic");
-      if (pic) profilePic.src = pic;
-      if (localStorage.getItem("theme") === "dark") document.body.classList.add("dark");
-      loadPosts();
-    };
-  </script>
-</body>
-</html>
+    function loadMessages() {
+      const topic = topicInput.value.trim() || "default";
+      db.ref(`messages/${topic}`).on("value", snap => {
+        const container = document.getEle
