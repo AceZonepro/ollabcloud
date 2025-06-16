@@ -3,236 +3,148 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CollabCloud</title>
+  <title>Reddit Style Forum</title>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: Arial, sans-serif;
+    :root {
+      --bg-color: #f6f7f8;
+      --text-color: #1c1c1c;
+      --card-bg: #ffffff;
+    }
+
+    body.dark-mode {
+      --bg-color: #1a1a1b;
+      --text-color: #d7dadc;
+      --card-bg: #272729;
     }
 
     body {
-      background: #f0f2f5;
-      color: #000;
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
     }
 
-    header {
+    .navbar {
+      background-color: #ff4500;
+      padding: 1rem;
+      color: white;
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      background: #0078d4;
-      padding: 10px 20px;
-      color: #fff;
     }
 
-    .logo {
+    .container {
       display: flex;
-      align-items: center;
-      gap: 10px;
+      margin: 2rem;
     }
 
-    .profile-area {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .profile-area img {
-      height: 40px;
-      width: 40px;
-      border-radius: 50%;
-      cursor: pointer;
-    }
-
-    .dark-toggle {
-      font-size: 20px;
-      background: white;
-      border-radius: 50%;
-      padding: 6px;
-      cursor: pointer;
-    }
-
-    main {
-      display: flex;
-      gap: 20px;
-      margin: 20px;
-    }
-
-    .left-panel {
+    .form {
       flex: 1;
-      max-width: 300px;
+      margin-right: 2rem;
     }
 
-    .chat-panel {
-      flex: 3;
+    .posts {
+      flex: 2;
     }
 
-    input[type="text"], textarea, button {
-      margin-bottom: 10px;
-      padding: 10px;
-      border-radius: 5px;
-      width: 100%;
+    .post {
+      background-color: var(--card-bg);
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+    }
+
+    .post img, .post video {
+      max-width: 100%;
+      margin-top: 0.5rem;
+    }
+
+    .post-controls {
+      display: flex;
+      gap: 1rem;
+      margin-top: 0.5rem;
     }
 
     button {
-      background: #0078d4;
-      color: #fff;
-      border: none;
       cursor: pointer;
-    }
-
-    .message {
-      background: #eef6ff;
-      padding: 10px;
-      border-radius: 6px;
-      margin-bottom: 10px;
     }
   </style>
 </head>
 <body>
-  <header>
-    <div class="logo">
-      <img src="logo.png" alt="Logo" height="40" />
-      <h1>CollabCloud</h1>
-    </div>
-    <div class="profile-area">
-      <span id="displayUsername">Anonymous</span>
-      <input type="text" id="usernameEditor" />
-      <img id="profilePic" src="https://via.placeholder.com/40" />
-      <input type="file" id="filePic" accept="image/*" style="display: none;" />
-      <button class="dark-toggle" onclick="toggleDarkMode()">🌓</button>
-    </div>
-  </header>
-  <main>
-    <div class="left-panel">
-      <input type="text" id="topicInput" placeholder="Enter topic" />
-    </div>
-    <div class="chat-panel">
-      <textarea id="msgInput" placeholder="Type your message..."></textarea>
-      <input type="file" id="fileMedia" accept="image/*,video/*" />
-      <button onclick="sendMessage()">Send</button>
-      <div id="messages"></div>
-    </div>
-  </main>
+  <div class="navbar">
+    <div>Reddit Clone</div>
+    <button onclick="toggleMode()">Toggle Dark/Light Mode</button>
+  </div>
 
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+  <div class="container">
+    <div class="form">
+      <input type="text" id="topic" placeholder="Topic" /><br /><br />
+      <textarea id="content" placeholder="What's on your mind?"></textarea><br /><br />
+      <input type="file" id="media" accept="image/*,video/*" /><br /><br />
+      <button onclick="addPost()">Post</button>
+    </div>
+    <div class="posts" id="posts"></div>
+  </div>
+
   <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyA_OT62IGPCaueoFN7yQP1EmeR1Yem4FW8",
-      authDomain: "collabcloud-f0ed5.firebaseapp.com",
-      databaseURL: "https://collabcloud-f0ed5-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "collabcloud-f0ed5",
-      storageBucket: "collabcloud-f0ed5.appspot.com",
-      messagingSenderId: "490023921099",
-      appId: "1:490023921099:web:YOUR_APP_ID"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-    const storage = firebase.storage();
-
-    function toggleDarkMode() {
-      document.body.classList.toggle("dark");
+    function toggleMode() {
+      document.body.classList.toggle("dark-mode");
     }
 
-    const displayUsername = document.getElementById("displayUsername");
-    const usernameEditor = document.getElementById("usernameEditor");
+    function addPost() {
+      const topic = document.getElementById("topic").value.trim();
+      const content = document.getElementById("content").value.trim();
+      const media = document.getElementById("media").files[0];
 
-    displayUsername.addEventListener("click", () => {
-      usernameEditor.value = displayUsername.textContent;
-      displayUsername.style.display = "none";
-      usernameEditor.style.display = "inline-block";
-      usernameEditor.focus();
-    });
+      if (!content) return;
 
-    usernameEditor.addEventListener("blur", saveUsername);
-    usernameEditor.addEventListener("keydown", e => {
-      if (e.key === "Enter") saveUsername();
-    });
+      const postDiv = document.createElement("div");
+      postDiv.className = "post";
 
-    function saveUsername() {
-      const name = usernameEditor.value.trim() || "Anonymous";
-      localStorage.setItem("username", name);
-      displayUsername.textContent = name;
-      displayUsername.style.display = "inline-block";
-      usernameEditor.style.display = "none";
-    }
+      const topicElem = topic ? `<h4>${topic}</h4>` : "";
+      postDiv.innerHTML = `${topicElem}<p>${content}</p>`;
 
-    document.getElementById("profilePic").addEventListener("click", () => {
-      document.getElementById("filePic").click();
-    });
-
-    document.getElementById("filePic").addEventListener("change", e => {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = evt => {
-        const dataUrl = evt.target.result;
-        document.getElementById("profilePic").src = dataUrl;
-        localStorage.setItem("profilePic", dataUrl);
-      };
-      reader.readAsDataURL(file);
-    });
-
-    function sendMessage() {
-      const topic = document.getElementById("topicInput").value.trim();
-      const text = document.getElementById("msgInput").value.trim();
-      const file = document.getElementById("fileMedia").files[0];
-      const username = localStorage.getItem("username") || "Anonymous";
-
-      if (!topic) return alert("Enter a topic.");
-      if (!text && !file) return alert("Type a message or attach a file.");
-
-      const message = { username, timestamp: Date.now() };
-      if (text) message.text = text;
-
-      if (file) {
-        const path = `media/${Date.now()}_${file.name}`;
-        const ref = storage.ref(path);
-        ref.put(file).then(() => ref.getDownloadURL()).then(url => {
-          message.mediaUrl = url;
-          message.mediaType = file.type.split('/')[0];
-          db.ref(`messages/${topic}`).push(message);
-        });
-      } else {
-        db.ref(`messages/${topic}`).push(message);
+      if (media) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          const src = e.target.result;
+          if (media.type.startsWith("video")) {
+            postDiv.innerHTML += `<video controls src="${src}"></video>`;
+          } else if (media.type.startsWith("image")) {
+            postDiv.innerHTML += `<img src="${src}" alt="Media" />`;
+          }
+        };
+        reader.readAsDataURL(media);
       }
 
-      document.getElementById("msgInput").value = "";
-      document.getElementById("fileMedia").value = "";
+      const controls = document.createElement("div");
+      controls.className = "post-controls";
+
+      const editBtn = document.createElement("button");
+      editBtn.textContent = "Edit";
+      editBtn.onclick = function () {
+        const newText = prompt("Edit your post:", content);
+        if (newText !== null) {
+          postDiv.querySelector("p").textContent = newText;
+        }
+      };
+
+      const deleteBtn = document.createElement("button");
+      deleteBtn.textContent = "Delete";
+      deleteBtn.onclick = function () {
+        postDiv.remove();
+      };
+
+      controls.appendChild(editBtn);
+      controls.appendChild(deleteBtn);
+      postDiv.appendChild(controls);
+
+      document.getElementById("posts").prepend(postDiv);
+
+      // Reset form
+      document.getElementById("topic").value = "";
+      document.getElementById("content").value = "";
+      document.getElementById("media").value = "";
     }
-
-    document.getElementById("topicInput").addEventListener("input", loadMessages);
-
-    function loadMessages() {
-      const topic = document.getElementById("topicInput").value.trim();
-      if (!topic) return;
-
-      db.ref(`messages/${topic}`).on("value", snap => {
-        const container = document.getElementById("messages");
-        container.innerHTML = "";
-        const messages = snap.val() || {};
-        Object.entries(messages).sort((a, b) => a[1].timestamp - b[1].timestamp).forEach(([id, m]) => {
-          const div = document.createElement("div");
-          div.className = "message";
-          div.innerHTML = `
-            <strong>${m.username}</strong>: ${m.text || ""}
-            ${m.mediaUrl ? (m.mediaType === "image" ? `<img src="${m.mediaUrl}" style="max-width:100%;"/>` :
-              `<video src="${m.mediaUrl}" controls style="max-width:100%;"></video>`) : ""}
-          `;
-          container.appendChild(div);
-        });
-      });
-    }
-
-    window.onload = () => {
-      displayUsername.textContent = localStorage.getItem("username") || "Anonymous";
-      const pic = localStorage.getItem("profilePic");
-      if (pic) document.getElementById("profilePic").src = pic;
-    };
   </script>
 </body>
 </html>
