@@ -153,4 +153,49 @@
     function loadMessages() {
       const topic = topicInput.value.trim() || "default";
       db.ref(`messages/${topic}`).on("value", snap => {
-        const container = document.getEle
+        const container = document.getElementById("messages");
+        container.innerHTML = "";
+        const messages = snap.val() || {};
+        Object.entries(messages).sort((a, b) => a[1].timestamp - b[1].timestamp).forEach(([id, m]) => {
+          const div = document.createElement("div");
+          div.className = "message";
+          div.innerHTML = `
+            <strong>${m.username}</strong><br>
+            ${m.text || ""}
+            ${m.mediaUrl ? (m.mediaType === "image" ? `<img src="${m.mediaUrl}" class="attached"/>` : `<video src="${m.mediaUrl}" controls class="attached"></video>`) : ""}
+            <div class="actions">
+              <button onclick="editMessage('${topic}','${id}','${(m.text || '').replace(/'/g, "\'")}')">Edit</button>
+              <button onclick="deleteMessage('${topic}','${id}')">Delete</button>
+            </div>
+          `;
+          container.appendChild(div);
+        });
+      });
+    }
+
+    function editMessage(topic, id, currentText) {
+      const newText = prompt("Edit message:", currentText);
+      if (newText !== null) db.ref(`messages/${topic}/${id}`).update({ text: newText });
+    }
+
+    function deleteMessage(topic, id) {
+      if (confirm("Delete this message?")) db.ref(`messages/${topic}/${id}`).remove();
+    }
+
+    function toggleDarkMode() {
+      const dark = document.body.classList.toggle("dark");
+      localStorage.setItem("darkMode", dark);
+    }
+
+    window.onload = () => {
+      displayUsername.textContent = localStorage.getItem("username") || "Anonymous";
+      const pic = localStorage.getItem("profilePic");
+      if (pic) document.getElementById("profilePic").src = pic;
+      if (localStorage.getItem("darkMode") === "true") document.body.classList.add("dark");
+      loadMessages();
+    };
+
+    topicInput.addEventListener("input", loadMessages);
+  </script>
+</body>
+</html>
