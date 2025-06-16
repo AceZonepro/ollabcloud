@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CollabCloud</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
@@ -12,16 +12,16 @@
     .logo { display: flex; align-items: center; gap: 10px; }
     .profile-area { display: flex; align-items: center; gap: 10px; }
     .profile-area img { height: 40px; width: 40px; border-radius: 50%; cursor: pointer; }
-    .dark-toggle { font-size: 24px; background: white; border-radius: 50%; padding: 5px; cursor: pointer; }
+    .dark-toggle { font-size: 24px; background: white; border-radius: 50%; padding: 4px; cursor: pointer; border: none; }
     main { margin: 20px auto; padding: 20px; max-width: 800px; background: #fff; border-radius: 10px; }
     body.dark main { background: #333; }
-    input, textarea, button { margin-bottom: 10px; padding: 10px; border-radius: 5px; width: 100%; }
-    textarea { resize: vertical; }
+    input[type="text"], textarea, button { margin-bottom: 10px; padding: 10px; border-radius: 5px; width: 100%; border: 1px solid #ccc; }
+    textarea { resize: vertical; min-height: 60px; }
     button { background: #0078d4; color: #fff; border: none; cursor: pointer; }
-    .message { background: #eef6ff; padding: 10px; border-radius: 6px; margin: 10px 0; position: relative; }
+    .message { background: #eef6ff; padding: 10px; border-radius: 6px; margin-top: 10px; position: relative; text-align: left; }
     body.dark .message { background: #2c2c2c; }
-    .actions { margin-top: 5px; text-align: right; }
-    .actions button { background: transparent; color: #0078d4; border: none; cursor: pointer; margin-left: 5px; }
+    .actions { margin-top: 5px; }
+    .actions button { background: transparent; color: #0078d4; border: none; cursor: pointer; margin-left: 5px; padding: 2px 5px; }
     img.attached, video.attached { margin-top: 10px; max-width: 100%; border-radius: 5px; display: block; }
     #displayUsername { cursor: pointer; font-weight: bold; }
     #usernameEditor { display: none; font-size: 16px; padding: 4px; border-radius: 4px; border: 1px solid #ccc; width: auto; }
@@ -30,7 +30,7 @@
 <body>
   <header>
     <div class="logo">
-      <img src="logo.png" alt="Logo" height="40" />
+      <img src="logo.png" alt="Logo" height="40"/>
       <h1>CollabCloud</h1>
     </div>
     <div class="profile-area">
@@ -43,7 +43,7 @@
   </header>
 
   <main>
-    <input type="text" id="topicInput" placeholder="Enter topic...">
+    <input type="text" id="topicInput" placeholder="Enter topic here" />
     <textarea id="msgInput" placeholder="Type here..."></textarea>
     <input type="file" id="fileMedia" accept="image/*,video/*" />
     <button onclick="sendMessage()">Send</button>
@@ -53,6 +53,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyA_OT62IGPCaueoFN7yQP1EmeR1Yem4FW8",
@@ -61,8 +62,9 @@
       projectId: "collabcloud-f0ed5",
       storageBucket: "collabcloud-f0ed5.appspot.com",
       messagingSenderId: "490023921099",
-      appId: "1:490023921099:web:YOUR_APP_ID"
+      appId: "1:490023921099:web:123456789abc"
     };
+
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     const storage = firebase.storage();
@@ -70,21 +72,10 @@
     const topicInput = document.getElementById("topicInput");
     const msgInput = document.getElementById("msgInput");
     const messagesDiv = document.getElementById("messages");
-    const displayUsername = document.getElementById("displayUsername");
-    const usernameEditor = document.getElementById("usernameEditor");
-    const profilePic = document.getElementById("profilePic");
 
-    displayUsername.addEventListener("click", () => {
-      usernameEditor.value = displayUsername.textContent;
-      displayUsername.style.display = "none";
-      usernameEditor.style.display = "inline-block";
-      usernameEditor.focus();
-    });
-
-    usernameEditor.addEventListener("blur", saveUsername);
-    usernameEditor.addEventListener("keydown", e => {
-      if (e.key === "Enter") saveUsername();
-    });
+    function getUsername() {
+      return localStorage.getItem("username") || "Anonymous";
+    }
 
     function saveUsername() {
       const name = usernameEditor.value.trim() || "Anonymous";
@@ -94,34 +85,22 @@
       usernameEditor.style.display = "none";
     }
 
-    function toggleDarkMode() {
-      document.body.classList.toggle("dark");
-      localStorage.setItem("darkMode", document.body.classList.contains("dark") ? "on" : "off");
-    }
-
-    document.getElementById("profilePic").addEventListener("click", () => {
-      document.getElementById("filePic").click();
+    displayUsername.addEventListener("click", () => {
+      usernameEditor.value = displayUsername.textContent;
+      displayUsername.style.display = "none";
+      usernameEditor.style.display = "inline-block";
+      usernameEditor.focus();
     });
-
-    document.getElementById("filePic").addEventListener("change", e => {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = evt => {
-        const dataUrl = evt.target.result;
-        profilePic.src = dataUrl;
-        localStorage.setItem("profilePic", dataUrl);
-      };
-      reader.readAsDataURL(file);
-    });
+    usernameEditor.addEventListener("blur", saveUsername);
+    usernameEditor.addEventListener("keydown", e => { if (e.key === "Enter") saveUsername(); });
 
     function sendMessage() {
       const topic = topicInput.value.trim();
       const text = msgInput.value.trim();
       const file = document.getElementById("fileMedia").files[0];
-      const username = localStorage.getItem("username") || "Anonymous";
-      if (!topic) return alert("Please enter a topic first.");
-      if (!text && !file) return alert("Type a message or attach a file.");
+      const username = getUsername();
+
+      if (!topic || (!text && !file)) return alert("Please enter a topic and message or file.");
 
       const message = { username, timestamp: Date.now(), topic };
       if (text) message.text = text;
@@ -131,7 +110,7 @@
         const ref = storage.ref(path);
         ref.put(file).then(() => ref.getDownloadURL()).then(url => {
           message.mediaUrl = url;
-          message.mediaType = file.type.split('/')[0];
+          message.mediaType = file.type.split("/")[0];
           db.ref(`messages/${topic}`).push(message);
         });
       } else {
@@ -145,17 +124,19 @@
     function loadMessages() {
       const topic = topicInput.value.trim();
       if (!topic) return;
+
       db.ref(`messages/${topic}`).on("value", snap => {
         messagesDiv.innerHTML = "";
-        const messages = snap.val() || {};
-        Object.entries(messages).sort((a, b) => a[1].timestamp - b[1].timestamp).forEach(([id, m]) => {
+        const data = snap.val() || {};
+        Object.entries(data).sort((a,b) => a[1].timestamp - b[1].timestamp).forEach(([id, msg]) => {
           const div = document.createElement("div");
           div.className = "message";
           div.innerHTML = `
-            <strong>${m.username}</strong>: ${m.text || ""}
-            ${m.mediaUrl ? (m.mediaType === "image" ? `<img src="${m.mediaUrl}" class="attached"/>` : `<video src="${m.mediaUrl}" controls class="attached"></video>`) : ""}
+            <strong>${msg.username}</strong> <em>[${msg.topic}]</em><br>
+            ${msg.text || ""}
+            ${msg.mediaUrl ? (msg.mediaType === "image" ? `<img src="${msg.mediaUrl}" class="attached"/>` : `<video src="${msg.mediaUrl}" controls class="attached"></video>`) : ""}
             <div class="actions">
-              <button onclick="editMessage('${topic}','${id}','${(m.text || '').replace(/'/g, "\'")}')">Edit</button>
+              <button onclick="editMessage('${topic}','${id}','${(msg.text || '').replace(/'/g, "\'")}')">Edit</button>
               <button onclick="deleteMessage('${topic}','${id}')">Delete</button>
             </div>
           `;
@@ -165,30 +146,40 @@
     }
 
     function editMessage(topic, id, currentText) {
-      const newText = prompt("Edit message:", currentText);
+      const newText = prompt("Edit your message:", currentText);
       if (newText !== null) db.ref(`messages/${topic}/${id}`).update({ text: newText });
     }
 
     function deleteMessage(topic, id) {
-      if (confirm("Delete this message?")) db.ref(`messages/${topic}/${id}`).remove();
+      if (confirm("Are you sure?")) db.ref(`messages/${topic}/${id}`).remove();
     }
 
-    topicInput.addEventListener("input", () => {
-      localStorage.setItem("topic", topicInput.value.trim());
-      loadMessages();
+    function toggleDarkMode() {
+      document.body.classList.toggle("dark");
+      localStorage.setItem("darkMode", document.body.classList.contains("dark") ? "1" : "0");
+    }
+
+    document.getElementById("profilePic").addEventListener("click", () => document.getElementById("filePic").click());
+    document.getElementById("filePic").addEventListener("change", e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = evt => {
+        const dataUrl = evt.target.result;
+        document.getElementById("profilePic").src = dataUrl;
+        localStorage.setItem("profilePic", dataUrl);
+      };
+      reader.readAsDataURL(file);
     });
 
+    topicInput.addEventListener("input", loadMessages);
+
     window.onload = () => {
-      displayUsername.textContent = localStorage.getItem("username") || "Anonymous";
+      displayUsername.textContent = getUsername();
       const pic = localStorage.getItem("profilePic");
-      if (pic) profilePic.src = pic;
-      if (localStorage.getItem("darkMode") === "on") document.body.classList.add("dark");
-      const savedTopic = localStorage.getItem("topic");
-      if (savedTopic) {
-        topicInput.value = savedTopic;
-        loadMessages();
-      }
-    };
+      if (pic) document.getElementById("profilePic").src = pic;
+      if (localStorage.getItem("darkMode") === "1") document.body.classList.add("dark");
+    }
   </script>
 </body>
 </html>
