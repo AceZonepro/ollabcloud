@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>CollabCloud</title>
   <style>
     * {
@@ -13,6 +13,7 @@
     }
     body {
       background-color: #f0f2f5;
+      color: #000;
     }
     header {
       display: flex;
@@ -45,12 +46,14 @@
     .menu {
       position: relative;
     }
-    .menu-btn {
-      font-size: 24px;
-      cursor: pointer;
+    .menu-btn,
+    .darkmode-toggle {
+      font-size: 18px;
       background: none;
       border: none;
       color: white;
+      cursor: pointer;
+      margin-left: 10px;
     }
     .dropdown {
       position: absolute;
@@ -84,7 +87,6 @@
       background-color: white;
       border-radius: 10px;
       padding: 20px;
-      max-width: 100%;
       width: 100%;
       height: calc(100vh - 100px);
       overflow-y: auto;
@@ -126,12 +128,46 @@
       border-radius: 5px;
       margin-bottom: 10px;
     }
+
+    /* 🌙 DARK MODE */
+    body.dark-mode {
+      background-color: #18191a;
+      color: #e4e6eb;
+    }
+    body.dark-mode header {
+      background-color: #242526;
+    }
+    body.dark-mode .dropdown {
+      background-color: #3a3b3c;
+      color: #e4e6eb;
+      border-color: #555;
+    }
+    body.dark-mode .message-container {
+      background-color: #242526;
+    }
+    body.dark-mode input,
+    body.dark-mode textarea {
+      background-color: #3a3b3c;
+      color: #e4e6eb;
+      border: 1px solid #555;
+    }
+    body.dark-mode .message-item {
+      background-color: #3a3b3c;
+      border-color: #555;
+    }
+    body.dark-mode .message-container button,
+    body.dark-mode .dropdown button {
+      background-color: #4a90e2;
+    }
+    body.dark-mode .links a {
+      color: #4a90e2;
+    }
   </style>
 </head>
 <body>
   <header>
     <div class="logo">
-      <img src="logo.png" alt="Logo" />
+      <img src="logo.png" alt="Logo"/>
       <h1>CollabCloud</h1>
     </div>
     <div class="profile-area">
@@ -139,43 +175,32 @@
       <span id="displayUsername"></span>
       <input type="file" id="fileInput" accept="image/*" style="display: none" onchange="uploadProfilePic(event)" />
       <div class="menu">
-  <button class="menu-btn" onclick="toggleDropdown()">☰</button>
-  <button class="darkmode-toggle" onclick="toggleDarkMode()">🌓</button>
- <div class="dropdown" id="dropdownMenu">
-    <div class="dropdown-section">
-      <label for="usernameInput"><strong>Username</strong></label>
-      <input type="text" id="usernameInput" placeholder="Enter Username" />
-      <button onclick="saveUsername()">Save</button>
-    </div>
-
-    <hr style="margin: 10px 0;" />
-
-    <div class="dropdown-section">
-      <h3 style="margin-bottom: 5px;">Welcome to <span style="color: #0078d4;">CollabCloud</span></h3>
-      <p style="font-size: 14px;">
-        CollabCloud is an unofficial website for everything concerning the International Baccalaureate. It helps students and educators collaborate in virtual classrooms and online communities.
-      </p>
-
-      <h4 style="margin-top: 10px;">🌟 Features</h4>
-      <ul style="font-size: 14px; padding-left: 20px;">
-        <li>✔ Connect with IB learners globally</li>
-        <li>✔ Join Discord communities for help</li>
-        <li>✔ Stay updated with tips & news</li>
-      </ul>
-
-      <h4 style="margin-top: 10px;">📚 About</h4>
-      <p style="font-size: 14px;">
-        Virtual classrooms connect students worldwide and provide access to vital learning tools. CollabCloud solves challenges like lack of interaction using online tools and communities.
-      </p>
-    </div>
-  </div>
-</div>
-
-
-
+        <button class="menu-btn" onclick="toggleDropdown()">☰</button>
+        <button class="darkmode-toggle" onclick="toggleDarkMode()">🌓</button>
+        <div class="dropdown" id="dropdownMenu">
+          <div class="dropdown-section">
+            <label for="usernameInput"><strong>Username</strong></label>
+            <input type="text" id="usernameInput" placeholder="Enter Username" />
+            <button onclick="saveUsername()">Save</button>
+          </div>
+          <hr style="margin: 10px 0;" />
+          <div class="dropdown-section">
+            <h3>Welcome to <span style="color: #0078d4;">CollabCloud</span></h3>
+            <p>CollabCloud is an unofficial IB platform helping students and educators collaborate online.</p>
+            <h4>🌟 Features</h4>
+            <ul>
+              <li>✔ Connect with IB learners globally</li>
+              <li>✔ Join Discord communities for help</li>
+              <li>✔ Stay updated with tips & news</li>
+            </ul>
+            <h4>📚 About</h4>
+            <p>Virtual classrooms provide access to vital tools and solve challenges like isolation through collaboration.</p>
+          </div>
+        </div>
       </div>
     </div>
   </header>
+
   <main>
     <div class="message-container">
       <input type="text" id="topicInput" placeholder="Enter Topic" />
@@ -188,6 +213,8 @@
       </div>
     </div>
   </main>
+
+  <!-- JS: Core Functionality -->
   <script>
     function toggleDropdown() {
       const dropdown = document.getElementById("dropdownMenu");
@@ -214,109 +241,66 @@
       }
     }
 
-    function addMessage() {
+    function toggleDarkMode() {
+      const isDark = document.body.classList.toggle('dark-mode');
+      localStorage.setItem('darkMode', isDark);
+    }
+
+    window.addEventListener("load", () => {
+      const savedPic = localStorage.getItem("profilePic");
+      const savedUsername = localStorage.getItem("username");
+      const darkMode = localStorage.getItem("darkMode") === 'true';
+
+      if (savedPic) document.getElementById("profilePic").src = savedPic;
+      if (savedUsername) document.getElementById("displayUsername").innerText = savedUsername;
+      if (darkMode) document.body.classList.add("dark-mode");
+    });
+  </script>
+
+  <!-- JS: Firebase Module -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyA_OT62IGPCaueoFN7yQP1EmeR1Yem4FW8",
+      authDomain: "collabcloud-f0ed5.firebaseapp.com",
+      databaseURL: "https://collabcloud-f0ed5-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "collabcloud-f0ed5",
+      storageBucket: "collabcloud-f0ed5.appspot.com",
+      messagingSenderId: "490023921099",
+      appId: "1:490023921099:web:YOUR_APP_ID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const messagesRef = ref(db, 'messages');
+
+    window.addMessage = function () {
       const topic = document.getElementById("topicInput").value;
       const text = document.getElementById("textInput").value;
       const username = localStorage.getItem("username") || "Anonymous";
+
       if (topic && text) {
-        const messageItem = document.createElement("div");
-        messageItem.className = "message-item";
-        messageItem.innerHTML = `<strong>${topic}</strong> by ${username}<br>${text}`;
-        document.getElementById("messageList").appendChild(messageItem);
+        push(messagesRef, {
+          topic,
+          text,
+          username,
+          timestamp: Date.now()
+        });
+
         document.getElementById("topicInput").value = "";
         document.getElementById("textInput").value = "";
       }
-    }
-
-    window.onload = function () {
-      const savedPic = localStorage.getItem("profilePic");
-      const savedUsername = localStorage.getItem("username");
-      if (savedPic) {
-        document.getElementById("profilePic").src = savedPic;
-      }
-      if (savedUsername) {
-        document.getElementById("displayUsername").innerText = savedUsername;
-      }
     };
+
+    onChildAdded(messagesRef, (data) => {
+      const msg = data.val();
+      const messageItem = document.createElement("div");
+      messageItem.className = "message-item";
+      messageItem.innerHTML = `<strong>${msg.topic}</strong> by ${msg.username}<br>${msg.text}`;
+      document.getElementById("messageList").appendChild(messageItem);
+    });
   </script>
-  <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyA_OT62IGPCaueoFN7yQP1EmeR1Yem4FW8",
-    authDomain: "collabcloud-f0ed5.firebaseapp.com",
-    databaseURL: "https://collabcloud-f0ed5-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "collabcloud-f0ed5",
-    storageBucket: "collabcloud-f0ed5.appspot.com",
-    messagingSenderId: "490023921099",
-    appId: "1:490023921099:web:YOUR_APP_ID"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-  const messagesRef = ref(db, 'messages');
-
-  window.onload = function () {
-    const savedPic = localStorage.getItem("profilePic");
-    const savedUsername = localStorage.getItem("username");
-    if (savedPic) {
-      document.getElementById("profilePic").src = savedPic;
-    }
-    if (savedUsername) {
-      document.getElementById("displayUsername").innerText = savedUsername;
-    }
-  };
-
-  window.toggleDropdown = function () {
-    const dropdown = document.getElementById("dropdownMenu");
-    dropdown.style.display = dropdown.style.display === "flex" ? "none" : "flex";
-  };
-
-  window.saveUsername = function () {
-    const username = document.getElementById("usernameInput").value;
-    localStorage.setItem("username", username);
-    document.getElementById("displayUsername").innerText = username;
-    toggleDropdown();
-  };
-
-  window.uploadProfilePic = function (event) {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = function (e) {
-        const img = document.getElementById("profilePic");
-        img.src = e.target.result;
-        localStorage.setItem("profilePic", e.target.result);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  window.addMessage = function () {
-    const topic = document.getElementById("topicInput").value;
-    const text = document.getElementById("textInput").value;
-    const username = localStorage.getItem("username") || "Anonymous";
-    if (topic && text) {
-      push(messagesRef, {
-        topic,
-        text,
-        username,
-        timestamp: Date.now()
-      });
-      document.getElementById("topicInput").value = "";
-      document.getElementById("textInput").value = "";
-    }
-  };
-
-  onChildAdded(messagesRef, (data) => {
-    const msg = data.val();
-    const messageItem = document.createElement("div");
-    messageItem.className = "message-item";
-    messageItem.innerHTML = `<strong>${msg.topic}</strong> by ${msg.username}<br>${msg.text}`;
-    document.getElementById("messageList").appendChild(messageItem);
-  });
-</script>
 </body>
 </html>
-
