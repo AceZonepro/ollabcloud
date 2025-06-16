@@ -5,171 +5,72 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>CollabCloud</title>
   <style>
-    :root {
-      --primary: #0078d4;
-      --bg-light: #f0f2f5;
-      --bg-dark: #1e1e1e;
-      --text-light: #ffffff;
-      --text-dark: #000000;
-      --message-light: #eef6ff;
-      --message-dark: #2c2c2c;
-    }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: Arial, sans-serif;
-    }
-
-    body {
-      background-color: var(--bg-light);
-      color: var(--text-dark);
-      transition: background-color 0.3s ease, color 0.3s ease;
-    }
-
-    body.dark {
-      background-color: var(--bg-dark);
-      color: var(--text-light);
-    }
-
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background-color: var(--primary);
-      padding: 10px 20px;
-      color: white;
-    }
-
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .logo img {
-      height: 40px;
-    }
-
-    .profile-area {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-    }
-
-    .profile-area img {
-      height: 40px;
-      width: 40px;
-      border-radius: 50%;
-      object-fit: cover;
-      cursor: pointer;
-      border: 2px solid white;
-    }
-
-    .dark-toggle {
-      cursor: pointer;
-      font-size: 20px;
-      background: white;
-      border-radius: 50%;
-      padding: 6px;
-      color: var(--primary);
-      transition: transform 0.3s;
-    }
-
-    .dark-toggle:hover {
-      transform: rotate(180deg);
-    }
-
-    main {
-      padding: 20px;
-    }
-
-    .message-container {
-      background-color: white;
-      padding: 20px;
-      border-radius: 10px;
-      max-width: 800px;
-      margin: 0 auto;
-    }
-
-    body.dark .message-container {
-      background-color: #2b2b2b;
-    }
-
-    input, textarea {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 10px;
-      font-size: 16px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
-
-    button {
-      background-color: var(--primary);
-      color: white;
-      padding: 10px 15px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    .message-item {
-      background-color: var(--message-light);
-      padding: 10px;
-      border-radius: 5px;
-      margin-top: 10px;
-      position: relative;
-    }
-
-    body.dark .message-item {
-      background-color: var(--message-dark);
-    }
-
-    .edit-btn, .delete-btn {
-      position: absolute;
-      top: 10px;
-      background: #ccc;
-      color: black;
-      padding: 5px;
-      font-size: 12px;
-      border: none;
-      cursor: pointer;
-    }
-
-    .edit-btn { right: 70px; }
-    .delete-btn { right: 10px; }
+    * { box-sizing: border-box; margin:0; padding:0; font-family: Arial, sans-serif; }
+    body { background: #f0f2f5; color: #000; transition: background 0.3s, color 0.3s; }
+    body.dark { background: #1e1e1e; color: #fff; }
+    header { display:flex; justify-content:space-between; align-items:center; background:#0078d4; padding:10px 20px; color:#fff; position:relative; }
+    .logo { display:flex; align-items:center; gap:10px; }
+    .logo img { height: 40px; }
+    .profile-area { display:flex; align-items:center; gap:10px; }
+    .profile-area img { height:40px; width:40px; border-radius:50%; cursor:pointer; }
+    .menu-btn { font-size:24px; background:none; border:none; color:white; cursor:pointer; }
+    .dark-toggle { font-size:20px; background:white; border-radius:50%; padding:6px; cursor:pointer; }
+    .sidebar { position:fixed; top:0; left:-250px; width:250px; height:100%; background:white; padding:20px; transition:left 0.3s; }
+    body.dark .sidebar { background:#333; color:#fff; }
+    .sidebar.open { left:0; }
+    main { margin:20px; padding:20px; max-width:800px; background:#fff; border-radius:10px; }
+    body.dark main { background:#333; }
+    textarea { width:100%; height:100px; padding:10px; border-radius:5px; border:1px solid #ccc; margin-bottom:10px; }
+    input[type=file] { margin-bottom:10px; }
+    button { padding:10px 15px; background:#0078d4; color:#fff; border:none; border-radius:5px; cursor:pointer; }
+    .message { background:#eef6ff; padding:10px; border-radius:6px; margin-top:10px; position:relative; }
+    body.dark .message { background:#2c2c2c; }
+    .actions { position:absolute; top:5px; right:10px; }
+    .actions button { background:transparent; color:#0078d4; border:none; cursor:pointer; margin-left:5px; }
+    img.attached, video.attached { margin-top:10px; max-width:100%; border-radius:5px; display:block; }
+    span#displayUsername { cursor:pointer; font-weight:bold; }
+    input#usernameEditor { display:none; font-size:16px; padding:4px; border-radius:4px; border:1px solid #ccc; }
   </style>
 </head>
 <body>
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <h2>Menu</h2>
+    <button onclick="toggleDarkMode()">Toggle Dark Mode</button><br/><br/>
+    <button onclick="signOut()">Sign Out</button>
+  </div>
+
+  <!-- Header -->
   <header>
+    <button class="menu-btn" onclick="toggleSidebar()">☰</button>
     <div class="logo">
-      <img src="logo.png" alt="Logo" />
+      <img src="logo.png" alt="Logo"/>
       <h1>CollabCloud</h1>
     </div>
     <div class="profile-area">
-      <span id="usernameDisplay">Anonymous</span>
-      <img id="profilePic" src="https://via.placeholder.com/40" alt="Profile" onclick="document.getElementById('fileInput').click();" />
-      <input type="file" id="fileInput" style="display:none" accept="image/*" onchange="uploadProfilePic(event)" />
-      <div class="dark-toggle" onclick="toggleDarkMode()">🌓</div>
+      <span id="displayUsername">Anonymous</span>
+      <input type="text" id="usernameEditor"/>
+      <img id="profilePic" src="https://via.placeholder.com/40" onclick="document.getElementById('filePic').click();"/>
+      <input type="file" id="filePic" accept="image/*" style="display:none" onchange="uploadProfilePic(event)"/>
+      <button class="dark-toggle" onclick="toggleDarkMode()">🌓</button>
     </div>
   </header>
 
+  <!-- Main -->
   <main>
-    <div class="message-container">
-      <input type="text" id="topicInput" placeholder="Enter Topic" />
-      <textarea id="textInput" placeholder="Enter Message"></textarea>
-      <button onclick="addMessage()">Post Message</button>
-      <div id="messageList"></div>
-    </div>
+    <textarea id="msgInput" placeholder="Type your message..."></textarea>
+    <input type="file" id="fileMedia" accept="image/*,video/*"/>
+    <button onclick="sendMessage()">Send</button>
+    <div id="messages"></div>
   </main>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getDatabase, ref, push, onChildAdded, update, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-
-    const firebaseConfig = {
+  <!-- Firebase & App JS -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+  <script>
+    const config = {
       apiKey: "AIzaSyA_OT62IGPCaueoFN7yQP1EmeR1Yem4FW8",
       authDomain: "collabcloud-f0ed5.firebaseapp.com",
       databaseURL: "https://collabcloud-f0ed5-default-rtdb.asia-southeast1.firebasedatabase.app",
@@ -178,94 +79,128 @@
       messagingSenderId: "490023921099",
       appId: "1:490023921099:web:YOUR_APP_ID"
     };
+    firebase.initializeApp(config);
+    const db = firebase.database(), auth = firebase.auth(), storage = firebase.storage();
+    let user = null;
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-    const messagesRef = ref(db, "messages");
-
-    // Load saved username and profile picture
-    window.onload = () => {
-      const username = localStorage.getItem("username") || "Anonymous";
-      document.getElementById("usernameDisplay").innerText = username;
-
-      const pic = localStorage.getItem("profilePic");
-      if (pic) document.getElementById("profilePic").src = pic;
-
-      if (localStorage.getItem("darkMode") === "enabled") {
-        document.body.classList.add("dark");
+    auth.onAuthStateChanged(u => {
+      if (u) {
+        user = u;
+        document.getElementById("profilePic").src = u.photoURL || 'https://via.placeholder.com/40';
+        loadMessages();
+      } else {
+        auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
       }
-    };
-
-    // Upload profile picture
-    window.uploadProfilePic = (e) => {
-      const file = e.target.files[0];
-      const reader = new FileReader();
-      reader.onload = function(evt) {
-        const img = evt.target.result;
-        document.getElementById("profilePic").src = img;
-        localStorage.setItem("profilePic", img);
-      };
-      reader.readAsDataURL(file);
-    };
-
-    // Toggle dark mode
-    window.toggleDarkMode = () => {
-      document.body.classList.toggle("dark");
-      localStorage.setItem("darkMode", document.body.classList.contains("dark") ? "enabled" : "disabled");
-    };
-
-    // Add new message
-    window.addMessage = () => {
-      const topic = document.getElementById("topicInput").value.trim();
-      const text = document.getElementById("textInput").value.trim();
-      const username = localStorage.getItem("username") || "Anonymous";
-
-      if (!topic || !text) return alert("Fill in both fields.");
-
-      push(messagesRef, {
-        topic,
-        text,
-        username,
-        timestamp: Date.now()
-      });
-
-      document.getElementById("topicInput").value = "";
-      document.getElementById("textInput").value = "";
-    };
-
-    // Display messages
-    onChildAdded(messagesRef, (data) => {
-      const msg = data.val();
-      const key = data.key;
-
-      const wrapper = document.createElement("div");
-      wrapper.className = "message-item";
-      wrapper.innerHTML = `
-        <strong>${msg.topic}</strong> by ${msg.username}<br>
-        <span id="text-${key}">${msg.text}</span>
-        ${msg.username === (localStorage.getItem("username") || "Anonymous") ? `
-          <button class="edit-btn" onclick="editMessage('${key}', '${msg.text.replace(/'/g, "\\'")}')">Edit</button>
-          <button class="delete-btn" onclick="deleteMessage('${key}')">Delete</button>
-        ` : ""}
-      `;
-      document.getElementById("messageList").appendChild(wrapper);
     });
 
-    // Edit message
-    window.editMessage = (key, currentText) => {
-      const newText = prompt("Edit your message:", currentText);
-      if (newText !== null) {
-        update(ref(db, `messages/${key}`), { text: newText });
-        document.getElementById(`text-${key}`).innerText = newText;
-      }
-    };
+    function sendMessage() {
+      const text = document.getElementById("msgInput").value.trim();
+      const file = document.getElementById("fileMedia").files[0];
+      const username = localStorage.getItem("username") || "Anonymous";
+      if (!text && !file) return alert("Enter text or attach media.");
 
-    // Delete message
-    window.deleteMessage = (key) => {
-      if (confirm("Are you sure you want to delete this message?")) {
-        remove(ref(db, `messages/${key}`));
-        location.reload(); // optional: clean refresh
-      }
+      let data = { username, uid: user.uid, timestamp: Date.now() };
+
+      if (text) data.text = text;
+      if (file) {
+        const path = `media/${Date.now()}_${file.name}`;
+        const ref = storage.ref(path);
+        ref.put(file).then(() => ref.getDownloadURL()).then(url => {
+          data.mediaUrl = url;
+          data.mediaType = file.type.split('/')[0];
+          db.ref("messages").push(data);
+        });
+      } else db.ref("messages").push(data);
+
+      document.getElementById("msgInput").value = "";
+      document.getElementById("fileMedia").value = "";
+    }
+
+    function loadMessages() {
+      db.ref("messages").on("value", snap => {
+        const msgs = snap.val() || {};
+        const cont = document.getElementById("messages");
+        cont.innerHTML = "";
+        Object.entries(msgs).sort((a,b)=>a[1].timestamp-b[1].timestamp).forEach(([id,m])=>{
+          const div = document.createElement("div");
+          div.className = "message";
+          div.innerHTML = `
+            <strong>${m.username}</strong>: ${m.text || ""}
+            ${m.mediaUrl ? (m.mediaType=="image" ?
+              `<img src="${m.mediaUrl}" class="attached"/>` :
+              `<video src="${m.mediaUrl}" controls class="attached"></video>`
+            ) : ""}
+            ${m.uid==user.uid ? `
+              <div class="actions">
+                <button onclick="editMessage('${id}','${(m.text||"").replace(/'/g,"\\'")}')">Edit</button>
+                <button onclick="deleteMessage('${id}')">Delete</button>
+              </div>` : ""}
+          `;
+          cont.appendChild(div);
+        });
+      });
+    }
+
+    function editMessage(id,current) {
+      const txt = prompt("Edit message:", current);
+      if (txt !== null) firebase.database().ref("messages/"+id).update({ text: txt });
+    }
+
+    function deleteMessage(id) {
+      if (confirm("Delete message?")) firebase.database().ref("messages/"+id).remove();
+    }
+
+    function toggleSidebar() {
+      document.getElementById("sidebar").classList.toggle("open");
+    }
+
+    function toggleDarkMode() {
+      document.body.classList.toggle("dark");
+    }
+
+    function signOut() {
+      auth.signOut();
+    }
+
+    function uploadProfilePic(e){
+      const f=e.target.files[0];
+      if (!f) return;
+      const fr=new FileReader();
+      fr.onload = evt => {
+        const img=evt.target.result;
+        document.getElementById("profilePic").src=img;
+        localStorage.setItem("profilePic",img);
+      };
+      fr.readAsDataURL(f);
+    }
+
+    function editUsername(){
+      const disp= document.getElementById("displayUsername");
+      const edt= document.getElementById("usernameEditor");
+      disp.style.display='none';
+      edt.value = disp.textContent;
+      edt.style.display='inline-block';
+      edt.focus();
+    }
+
+    document.getElementById("usernameEditor").addEventListener("blur",saveUsername);
+    document.getElementById("usernameEditor").addEventListener("keydown",e=>{
+      if(e.key==="Enter") saveUsername();
+    });
+
+    function saveUsername(){
+      const edt=document.getElementById("usernameEditor");
+      const nm=edt.value.trim()||"Anonymous";
+      localStorage.setItem("username",nm);
+      document.getElementById("displayUsername").textContent=nm;
+      edt.style.display="none";
+      document.getElementById("displayUsername").style.display="inline";
+    }
+
+    window.onload = () => {
+      document.getElementById("displayUsername").textContent = localStorage.getItem("username") || "Anonymous";
+      const pic=localStorage.getItem("profilePic");
+      if(pic) document.getElementById("profilePic").src=pic;
     };
   </script>
 </body>
