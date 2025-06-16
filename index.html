@@ -5,182 +5,187 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CollabCloud</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
-    body { background: #f0f2f5; color: #000; transition: background 0.3s, color 0.3s; }
-    body.dark { background: #1e1e1e; color: #fff; }
-    header { display: flex; justify-content: space-between; align-items: center; background: #0078d4; padding: 10px 20px; color: #fff; }
-    .logo { display: flex; align-items: center; gap: 10px; }
-    .profile-area { display: flex; align-items: center; gap: 10px; }
-    .profile-area img { height: 40px; width: 40px; border-radius: 50%; cursor: pointer; }
-    .dark-toggle { font-size: 20px; background: white; border-radius: 50%; padding: 6px; cursor: pointer; }
-    main { margin: 20px auto; padding: 20px; max-width: 800px; background: #fff; border-radius: 10px; }
-    body.dark main { background: #333; }
-    select, input[type="text"], textarea, button { margin-bottom: 10px; padding: 10px; border-radius: 5px; width: 100%; }
-    button { background: #0078d4; color: #fff; border: none; cursor: pointer; }
-    .message { background: #eef6ff; padding: 10px; border-radius: 6px; margin-top: 10px; position: relative; }
-    body.dark .message { background: #2c2c2c; }
-    .actions { position: absolute; top: 10px; right: 10px; display: flex; gap: 5px; }
-    .actions button { background: transparent; color: #0078d4; border: none; cursor: pointer; }
-    img.attached, video.attached { margin-top: 10px; max-width: 100%; border-radius: 5px; display: block; }
-    span#displayUsername { cursor: pointer; font-weight: bold; }
-    input#usernameEditor { display: none; font-size: 16px; padding: 4px; border-radius: 4px; border: 1px solid #ccc; width: auto; }
-    .post-topic { font-weight: bold; color: #555; margin-bottom: 5px; }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background-color: #f0f2f5;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    .dark-mode {
+      background-color: #121212;
+      color: #e0e0e0;
+    }
+    header {
+      background-color: #0079d3;
+      color: white;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    header img {
+      height: 40px;
+      margin-right: 10px;
+    }
+    .container {
+      max-width: 800px;
+      margin: 20px auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .dark-mode .container {
+      background: #1e1e1e;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    .post {
+      background: #f9f9f9;
+      padding: 10px;
+      margin: 10px 0;
+      border-left: 4px solid #0079d3;
+    }
+    .dark-mode .post {
+      background: #2c2c2c;
+    }
+    .post-topic {
+      font-weight: bold;
+    }
+    .post-username {
+      color: gray;
+    }
+    .emoji-picker {
+      margin: 10px 0;
+    }
+    button {
+      padding: 10px 15px;
+      background-color: #0079d3;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .edit-btn, .delete-btn {
+      margin-left: 10px;
+      font-size: 0.9em;
+      color: #0079d3;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+    .media {
+      max-width: 100%;
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
   <header>
-    <div class="logo">
-      <img src="logo.png" alt="Logo" height="40"/>
+    <div style="display: flex; align-items: center">
+      <img src="collabcloud-logo.png" alt="CollabCloud Logo">
       <h1>CollabCloud</h1>
     </div>
-    <div class="profile-area">
-      <span id="displayUsername">Anonymous</span>
-      <input type="text" id="usernameEditor" />
-      <img id="profilePic" src="https://via.placeholder.com/40" />
-      <input type="file" id="filePic" accept="image/*" style="display: none;" />
-      <button class="dark-toggle" onclick="toggleDarkMode()">🌓</button>
+    <div>
+      <span id="username-display"></span>
+      <button onclick="toggleTheme()">🌓</button>
     </div>
   </header>
 
-  <main>
-    <input type="text" id="newTopicInput" placeholder="Enter a topic (e.g., science, tech)" />
-    <textarea id="msgInput" placeholder="Type here..."></textarea>
-    <input type="file" id="fileMedia" accept="image/*,video/*" />
-    <button onclick="sendMessage()">Send</button>
+  <div class="container">
+    <input type="text" id="topic" placeholder="Enter a topic (e.g., science, tech)" />
+    <textarea id="message" placeholder="Type here..."></textarea>
+    <input type="file" id="mediaFile" />
+    <button onclick="sendPost()">Send</button>
 
-    <div id="messages"></div>
-  </main>
+    <div id="posts"></div>
+  </div>
 
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
-
+  <script src="https://cdn.jsdelivr.net/npm/emoji-picker-element"></script>
   <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyA_OT62IGPCaueoFN7yQP1EmeR1Yem4FW8",
-      authDomain: "collabcloud-f0ed5.firebaseapp.com",
-      databaseURL: "https://collabcloud-f0ed5-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "collabcloud-f0ed5",
-      storageBucket: "collabcloud-f0ed5.appspot.com",
-      messagingSenderId: "490023921099",
-      appId: "1:490023921099:web:YOUR_APP_ID"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-    const storage = firebase.storage();
+    const postsDiv = document.getElementById('posts');
+    const usernameDisplay = document.getElementById('username-display');
+    const themeKey = 'collabcloud-theme';
+    const usernameKey = 'collabcloud-username';
 
-    const displayUsername = document.getElementById("displayUsername");
-    const usernameEditor = document.getElementById("usernameEditor");
+    if (!localStorage.getItem(usernameKey)) {
+      const name = prompt('Enter your username:');
+      localStorage.setItem(usernameKey, name);
+    }
+    usernameDisplay.textContent = localStorage.getItem(usernameKey);
 
-    displayUsername.addEventListener("click", () => {
-      usernameEditor.value = displayUsername.textContent;
-      displayUsername.style.display = "none";
-      usernameEditor.style.display = "inline-block";
-      usernameEditor.focus();
-    });
+    const savedTheme = localStorage.getItem(themeKey);
+    if (savedTheme === 'dark') document.body.classList.add('dark-mode');
 
-    usernameEditor.addEventListener("blur", saveUsername);
-    usernameEditor.addEventListener("keydown", e => {
-      if (e.key === "Enter") saveUsername();
-    });
-
-    function saveUsername() {
-      const name = usernameEditor.value.trim() || "Anonymous";
-      localStorage.setItem("username", name);
-      displayUsername.textContent = name;
-      displayUsername.style.display = "inline-block";
-      usernameEditor.style.display = "none";
+    function toggleTheme() {
+      document.body.classList.toggle('dark-mode');
+      localStorage.setItem(themeKey, document.body.classList.contains('dark-mode') ? 'dark' : 'light');
     }
 
-    function sendMessage() {
-      const topic = document.getElementById("newTopicInput").value.trim();
-      const text = document.getElementById("msgInput").value.trim();
-      const file = document.getElementById("fileMedia").files[0];
-      const username = localStorage.getItem("username") || "Anonymous";
-
-      if (!topic) return alert("Please enter a topic.");
-      if (!text && !file) return alert("Type a message or attach a file.");
-
-      const message = { username, topic, timestamp: Date.now() };
-      if (text) message.text = text;
-
-      if (file) {
-        const path = `media/${Date.now()}_${file.name}`;
-        const ref = storage.ref(path);
-        ref.put(file).then(() => ref.getDownloadURL()).then(url => {
-          message.mediaUrl = url;
-          message.mediaType = file.type.split('/')[0];
-          db.ref(`messages/${topic}`).push(message);
-        });
-      } else {
-        db.ref(`messages/${topic}`).push(message);
-      }
-
-      document.getElementById("msgInput").value = "";
-      document.getElementById("fileMedia").value = "";
-    }
-
-    function loadMessages() {
-      db.ref("messages").on("value", snap => {
-        const container = document.getElementById("messages");
-        container.innerHTML = "";
-        const topics = snap.val() || {};
-        for (let topic in topics) {
-          const messages = topics[topic];
-          for (let id in messages) {
-            const m = messages[id];
-            const div = document.createElement("div");
-            div.className = "message";
-            div.innerHTML = `
-              <div class="post-topic">#${m.topic}</div>
-              <strong>${m.username}</strong>: ${m.text || ""}
-              ${m.mediaUrl ? (m.mediaType === "image" ? `<img src="${m.mediaUrl}" class="attached"/>` : `<video src="${m.mediaUrl}" controls class="attached"></video>`) : ""}
-              <div class="actions">
-                <button onclick="editMessage('${m.topic}','${id}','${(m.text || '').replace(/'/g, "\\'")}')">Edit</button>
-                <button onclick="deleteMessage('${m.topic}','${id}')">Delete</button>
-              </div>
-            `;
-            container.appendChild(div);
-          }
-        }
+    let posts = JSON.parse(localStorage.getItem('collabcloud-posts') || '[]');
+    function renderPosts() {
+      postsDiv.innerHTML = '';
+      posts.forEach((post, index) => {
+        const postEl = document.createElement('div');
+        postEl.className = 'post';
+        postEl.innerHTML = `
+          <div class="post-topic">#${post.topic}</div>
+          <div class="post-username">${post.username}:</div>
+          <div class="post-content">${post.message}</div>
+          ${post.media ? post.media.includes('video') ? `<video class="media" controls src="${post.media}"></video>` : `<img class="media" src="${post.media}" />` : ''}
+          <button class="edit-btn" onclick="editPost(${index})">Edit</button>
+          <button class="delete-btn" onclick="deletePost(${index})">Delete</button>
+        `;
+        postsDiv.appendChild(postEl);
       });
     }
 
-    function editMessage(topic, id, currentText) {
-      const newText = prompt("Edit message:", currentText);
-      if (newText !== null) db.ref(`messages/${topic}/${id}`).update({ text: newText });
-    }
+    function sendPost() {
+      const topic = document.getElementById('topic').value.trim();
+      const message = document.getElementById('message').value.trim();
+      const file = document.getElementById('mediaFile').files[0];
+      const username = localStorage.getItem(usernameKey);
 
-    function deleteMessage(topic, id) {
-      if (confirm("Delete this message?")) db.ref(`messages/${topic}/${id}`).remove();
-    }
+      if (!topic || !message) return alert('Topic and message required.');
 
-    function toggleDarkMode() {
-      document.body.classList.toggle("dark");
-    }
-
-    document.getElementById("profilePic").addEventListener("click", () => {
-      document.getElementById("filePic").click();
-    });
-
-    document.getElementById("filePic").addEventListener("change", e => {
-      const file = e.target.files[0];
-      if (!file) return;
       const reader = new FileReader();
-      reader.onload = evt => {
-        const dataUrl = evt.target.result;
-        document.getElementById("profilePic").src = dataUrl;
-        localStorage.setItem("profilePic", dataUrl);
-      };
-      reader.readAsDataURL(file);
-    });
+      reader.onloadend = function () {
+        posts.unshift({ topic, message, username, media: file ? reader.result : null });
+        localStorage.setItem('collabcloud-posts', JSON.stringify(posts));
+        renderPosts();
+        document.getElementById('topic').value = '';
+        document.getElementById('message').value = '';
+        document.getElementById('mediaFile').value = '';
+      }
+      if (file) {
+        reader.readAsDataURL(file);
+      } else {
+        reader.onloadend();
+      }
+    }
 
-    window.onload = () => {
-      displayUsername.textContent = localStorage.getItem("username") || "Anonymous";
-      const pic = localStorage.getItem("profilePic");
-      if (pic) document.getElementById("profilePic").src = pic;
-      loadMessages();
-    };
+    function deletePost(index) {
+      posts.splice(index, 1);
+      localStorage.setItem('collabcloud-posts', JSON.stringify(posts));
+      renderPosts();
+    }
+
+    function editPost(index) {
+      const post = posts[index];
+      const newMsg = prompt('Edit message:', post.message);
+      if (newMsg !== null) {
+        posts[index].message = newMsg;
+        localStorage.setItem('collabcloud-posts', JSON.stringify(posts));
+        renderPosts();
+      }
+    }
+
+    renderPosts();
   </script>
 </body>
 </html>
