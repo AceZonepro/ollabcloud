@@ -5,6 +5,162 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CollabCloud</title>
   <style>
+    <script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyA_OT62IGPCaueoFN7yQP1EmeR1Yem4FW8",
+    authDomain: "collabcloud-f0ed5.firebaseapp.com",
+    databaseURL: "https://collabcloud-f0ed5-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "collabcloud-f0ed5",
+    storageBucket: "collabcloud-f0ed5.appspot.com",
+    messagingSenderId: "490023921099",
+    appId: "1:490023921099:web:YOUR_APP_ID"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+  const storage = firebase.storage();
+
+  const displayUsername = document.getElementById("displayUsername");
+  const usernameEditor = document.getElementById("usernameEditor");
+  const profilePic = document.getElementById("profilePic");
+  const filePic = document.getElementById("filePic");
+  const topicInput = document.getElementById("newTopicInput");
+  const msgInput = document.getElementById("msgInput");
+  const fileMedia = document.getElementById("fileMedia");
+  const messagesContainer = document.getElementById("messages");
+
+  // Username setup
+  window.onload = () => {
+    const storedName = localStorage.getItem("username");
+    const storedPic = localStorage.getItem("profilePic");
+    const storedMode = localStorage.getItem("mode");
+
+    if (storedName) displayUsername.textContent = storedName;
+    if (storedPic) profilePic.src = storedPic;
+    if (storedMode === "dark") document.body.classList.add("dark");
+
+    loadMessages();
+  };
+
+  displayUsername.addEventListener("click", () => {
+    usernameEditor.value = displayUsername.textContent;
+    displayUsername.style.display = "none";
+    usernameEditor.style.display = "inline-block";
+    usernameEditor.focus();
+  });
+
+  usernameEditor.addEventListener("blur", saveUsername);
+  usernameEditor.addEventListener("keydown", e => {
+    if (e.key === "Enter") saveUsername();
+  });
+
+  function saveUsername() {
+    const name = usernameEditor.value.trim() || "Anonymous";
+    localStorage.setItem("username", name);
+    displayUsername.textContent = name;
+    displayUsername.style.display = "inline-block";
+    usernameEditor.style.display = "none";
+  }
+
+  profilePic.addEventListener("click", () => filePic.click());
+
+  filePic.addEventListener("change", e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = evt => {
+      profilePic.src = evt.target.result;
+      localStorage.setItem("profilePic", evt.target.result);
+    };
+    reader.readAsDataURL(file);
+  });
+
+  function toggleDarkMode() {
+    document.body.classList.toggle("dark");
+    localStorage.setItem("mode", document.body.classList.contains("dark") ? "dark" : "light");
+  }
+
+  function sendMessage() {
+    const topic = topicInput.value.trim();
+    const text = msgInput.value.trim();
+    const file = fileMedia.files[0];
+    const username = localStorage.getItem("username") || "Anonymous";
+
+    if (!topic) return alert("Enter a topic.");
+    if (!text && !file) return alert("Type a message or attach media.");
+
+    const msgRef = db.ref("messages").push();
+    const message = {
+      id: msgRef.key,
+      username,
+      topic,
+      timestamp: Date.now()
+    };
+
+    if (text) message.text = text;
+
+    if (file) {
+      const path = `media/${Date.now()}_${file.name}`;
+      const ref = storage.ref(path);
+
+      ref.put(file).then(() => ref.getDownloadURL())
+        .then(url => {
+          message.mediaUrl = url;
+          message.mediaType = file.type.startsWith("image") ? "image" : "video";
+          msgRef.set(message);
+        });
+    } else {
+      msgRef.set(message);
+    }
+
+    msgInput.value = "";
+    fileMedia.value = "";
+  }
+
+  function loadMessages() {
+    db.ref("messages").on("value", snap => {
+      messagesContainer.innerHTML = "";
+      const data = snap.val();
+      if (!data) return;
+      const username = localStorage.getItem("username") || "Anonymous";
+
+      Object.values(data).sort((a, b) => a.timestamp - b.timestamp).forEach(msg => {
+        const div = document.createElement("div");
+        div.className = "message";
+        div.innerHTML = `
+          <div><strong>${msg.username}</strong> • <em>${msg.topic || "No topic"}</em></div>
+          <div>${msg.text || ""}</div>
+          ${msg.mediaUrl ? (
+            msg.mediaType === "image"
+              ? `<img src="${msg.mediaUrl}" class="attached">`
+              : `<video src="${msg.mediaUrl}" controls class="attached"></video>`
+          ) : ""}
+          ${msg.username === username ? `
+            <div class="actions">
+              <button onclick="editMessage('${msg.id}', '${msg.text?.replace(/'/g, "\\'") || ""}')">Edit</button>
+              <button onclick="deleteMessage('${msg.id}')">Delete</button>
+            </div>
+          ` : ""}
+        `;
+        messagesContainer.appendChild(div);
+      });
+    });
+  }
+
+  function editMessage(id, text) {
+    const newText = prompt("Edit message:", text);
+    if (newText !== null) {
+      db.ref("messages/" + id).update({ text: newText });
+    }
+  }
+
+  function deleteMessage(id) {
+    if (confirm("Delete your message?")) {
+      db.ref("messages/" + id).remove();
+    }
+  }
+</script>
+
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
     body { background: #f0f2f5; color: #000; transition: background 0.3s, color 0.3s; }
     body.dark { background: #1e1e1e; color: #fff; }
