@@ -155,3 +155,56 @@ main {
   margin-bottom: 10px;
   border: 1px solid #cde3ff;
 }
+
+.darkmode-toggle {
+  font-size: 18px;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  margin-left: 10px;
+}
+
+body.dark-mode {
+  background-color: #18191a;
+  color: #e4e6eb;
+}
+
+body.dark-mode header {
+  background-color: #242526;
+  color: #e4e6eb;
+}
+
+body.dark-mode .dropdown {
+  background-color: #3a3b3c;
+  color: #e4e6eb;
+  border-color: #555;
+}
+
+body.dark-mode .message-container {
+  background-color: #242526;
+  color: #e4e6eb;
+  box-shadow: none;
+}
+
+body.dark-mode input,
+body.dark-mode textarea {
+  background-color: #3a3b3c;
+  color: #e4e6eb;
+  border: 1px solid #555;
+}
+
+body.dark-mode .message-item {
+  background-color: #3a3b3c;
+  border-color: #555;
+}
+
+body.dark-mode .message-container button,
+body.dark-mode .dropdown button {
+  background-color: #4a90e2;
+}
+
+body.dark-mode .links a {
+  color: #4a90e2;
+}
+
