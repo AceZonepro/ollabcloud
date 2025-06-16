@@ -1,199 +1,157 @@
-/* Global Reset and Base Styles */
 * {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
-  font-family: "Segoe UI", sans-serif;
+  font-family: Arial, sans-serif;
 }
 
 body {
-  background-color: #f5f7fa;
+  background-color: #f0f2f5;
   color: #333;
-  line-height: 1.6;
 }
 
-/* Header Section */
 header {
-  background: #4b0082;
-  color: white;
-  padding: 1rem 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  background-color: #0078d4;
+  padding: 10px 20px;
+  color: white;
 }
 
-.logo-title {
+.logo {
   display: flex;
   align-items: center;
 }
 
-#logo {
-  width: 50px;
+.logo img {
+  height: 40px;
   margin-right: 10px;
 }
 
-header h1 {
-  font-size: 2rem;
+.profile-area {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-/* Profile Picture */
-#profile img {
-  width: 50px;
-  height: 50px;
+.profile-area img {
+  height: 40px;
+  width: 40px;
   border-radius: 50%;
   object-fit: cover;
+  cursor: pointer;
 }
 
-/* Navigation Bar */
-.navbar {
-  background-color: #2979ff;
-  padding: 10px 20px;
-  color: white;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.menu {
+  position: relative;
 }
 
-.menu-icon {
+.menu-btn {
   font-size: 24px;
-  cursor: pointer;
-}
-
-/* Dropdown Menu */
-.dropdown-content {
-  display: none;
-  position: absolute;
-  right: 20px;
-  top: 70px;
-  background-color: white;
-  color: black;
-  min-width: 200px;
-  box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-  z-index: 10;
-  border-radius: 8px;
-  padding: 10px;
-}
-
-.dropdown-content button,
-.dropdown-content .upload-btn {
-  width: 100%;
-  padding: 10px;
-  margin: 5px 0;
+  background: none;
   border: none;
-  background-color: #f1f1f1;
-  text-align: left;
-  border-radius: 5px;
+  color: white;
   cursor: pointer;
-  transition: background 0.3s ease;
 }
 
-.dropdown-content button:hover,
-.dropdown-content .upload-btn:hover {
-  background-color: #ddd;
-}
-
-/* Main Content Area */
-main {
-  padding: 1rem 2rem;
-  max-width: 800px;
-  margin: auto;
-}
-
-/* Chat Box */
-#chatBox {
-  height: 300px;
-  overflow-y: scroll;
-  background: white;
+.dropdown {
+  display: none;
+  flex-direction: column;
+  position: absolute;
+  top: 50px;
+  right: 0;
+  width: 250px;
+  background-color: white;
   border: 1px solid #ccc;
-  padding: 1rem;
-  margin-bottom: 1rem;
-  border-radius: 10px;
+  border-radius: 8px;
+  padding: 15px;
+  z-index: 1000;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Message Container */
+.dropdown input[type="text"] {
+  padding: 8px;
+  margin-bottom: 10px;
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.dropdown button {
+  padding: 8px;
+  background-color: #0078d4;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+main {
+  padding: 20px;
+}
+
 .message-container {
   background-color: white;
   border-radius: 10px;
   padding: 20px;
-  width: 100%;
-  max-width: 800px;
-  margin: 20px auto;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  max-width: 900px;
+  margin: 0 auto;
+  height: calc(100vh - 100px);
+  overflow-y: auto;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .message-container input,
 .message-container textarea {
   width: 100%;
-  margin-bottom: 10px;
-  padding: 15px;
+  padding: 12px;
+  margin-bottom: 12px;
   font-size: 16px;
   border: 1px solid #ccc;
-  border-radius: 8px;
+  border-radius: 6px;
 }
 
 .message-container button {
+  padding: 10px 20px;
   background-color: #0078d4;
   color: white;
-  padding: 12px 20px;
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 16px;
-  transition: background 0.3s ease;
+  transition: background-color 0.2s ease-in-out;
 }
 
 .message-container button:hover {
-  background-color: #005ea2;
+  background-color: #005fa3;
 }
 
-/* Messages List */
+.links {
+  margin-top: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.links a {
+  color: #0078d4;
+  text-decoration: none;
+  font-weight: bold;
+  transition: color 0.2s;
+}
+
+.links a:hover {
+  color: #005fa3;
+}
+
 .message-list {
   margin-top: 20px;
 }
 
 .message-item {
   background-color: #eef6ff;
-  padding: 15px;
+  padding: 12px;
   border-radius: 6px;
   margin-bottom: 10px;
-}
-
-/* Dropdown Popup Styling */
-.dropdown {
-  position: absolute;
-  top: 60px;
-  right: 20px;
-  background-color: white;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  padding: 15px;
-  display: none;
-  width: 250px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
-}
-
-.dropdown-section {
-  margin-bottom: 15px;
-}
-
-/* Responsive tweaks */
-@media (max-width: 600px) {
-  header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .logo-title h1 {
-    font-size: 1.5rem;
-  }
-
-  .dropdown-content {
-    right: 10px;
-    top: 60px;
-  }
-
-  .message-container {
-    padding: 15px;
-  }
+  border: 1px solid #cde3ff;
 }
