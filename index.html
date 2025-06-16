@@ -2,48 +2,113 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CollabCloud</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
-    body { background: #f0f2f5; color: #000; transition: background 0.3s, color 0.3s; }
-    body.dark { background: #1e1e1e; color: #fff; }
-    header { display: flex; justify-content: space-between; align-items: center; background: #0078d4; padding: 10px 20px; color: #fff; }
-    .logo { display: flex; align-items: center; gap: 10px; }
-    .profile-area { display: flex; align-items: center; gap: 10px; }
-    .profile-area img { height: 40px; width: 40px; border-radius: 50%; cursor: pointer; }
-    .dark-toggle { font-size: 20px; background: white; border-radius: 50%; padding: 6px; cursor: pointer; }
-    main { display: flex; flex-direction: row; gap: 20px; margin: 20px; }
-    .left-panel { width: 300px; background: #fff; padding: 20px; border-radius: 10px; }
-    .right-panel { flex: 1; background: #fff; padding: 20px; border-radius: 10px; }
-    body.dark .left-panel, body.dark .right-panel { background: #333; }
-    textarea, input[type="text"], button { width: 100%; padding: 10px; border-radius: 5px; margin-bottom: 10px; }
-    button { background: #0078d4; color: #fff; border: none; cursor: pointer; }
-    .message { background: #eef6ff; padding: 10px; border-radius: 6px; margin-bottom: 10px; }
-    body.dark .message { background: #2c2c2c; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: #f0f2f5;
+      color: #000;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #0078d4;
+      padding: 10px 20px;
+      color: #fff;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .profile-area {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .profile-area img {
+      height: 40px;
+      width: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+
+    .dark-toggle {
+      font-size: 20px;
+      background: white;
+      border-radius: 50%;
+      padding: 6px;
+      cursor: pointer;
+    }
+
+    main {
+      display: flex;
+      gap: 20px;
+      margin: 20px;
+    }
+
+    .left-panel {
+      flex: 1;
+      max-width: 300px;
+    }
+
+    .chat-panel {
+      flex: 3;
+    }
+
+    input[type="text"], textarea, button {
+      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: 5px;
+      width: 100%;
+    }
+
+    button {
+      background: #0078d4;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+
+    .message {
+      background: #eef6ff;
+      padding: 10px;
+      border-radius: 6px;
+      margin-bottom: 10px;
+    }
   </style>
 </head>
 <body>
   <header>
     <div class="logo">
-      <img src="logo.png" alt="Logo" height="40"/>
+      <img src="logo.png" alt="Logo" height="40" />
       <h1>CollabCloud</h1>
     </div>
     <div class="profile-area">
       <span id="displayUsername">Anonymous</span>
-      <input type="text" id="usernameEditor" style="display:none;" />
+      <input type="text" id="usernameEditor" />
       <img id="profilePic" src="https://via.placeholder.com/40" />
       <input type="file" id="filePic" accept="image/*" style="display: none;" />
       <button class="dark-toggle" onclick="toggleDarkMode()">🌓</button>
     </div>
   </header>
-
   <main>
     <div class="left-panel">
-      <input type="text" id="newTopicInput" placeholder="Add new topic" />
-      <button onclick="addTopic()">Add Topic</button>
+      <input type="text" id="topicInput" placeholder="Enter topic" />
     </div>
-    <div class="right-panel">
+    <div class="chat-panel">
       <textarea id="msgInput" placeholder="Type your message..."></textarea>
       <input type="file" id="fileMedia" accept="image/*,video/*" />
       <button onclick="sendMessage()">Send</button>
@@ -64,6 +129,7 @@
       messagingSenderId: "490023921099",
       appId: "1:490023921099:web:YOUR_APP_ID"
     };
+
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     const storage = firebase.storage();
@@ -98,6 +164,7 @@
     document.getElementById("profilePic").addEventListener("click", () => {
       document.getElementById("filePic").click();
     });
+
     document.getElementById("filePic").addEventListener("change", e => {
       const file = e.target.files[0];
       if (!file) return;
@@ -110,30 +177,17 @@
       reader.readAsDataURL(file);
     });
 
-    function addTopic() {
-      const topic = document.getElementById("newTopicInput").value.trim();
-      if (!topic) return;
-      localStorage.setItem("currentTopic", topic);
-      loadMessages();
-    }
-
     function sendMessage() {
-      const topic = localStorage.getItem("currentTopic");
+      const topic = document.getElementById("topicInput").value.trim();
       const text = document.getElementById("msgInput").value.trim();
       const file = document.getElementById("fileMedia").files[0];
       const username = localStorage.getItem("username") || "Anonymous";
 
-      if (!topic) return alert("Please add a topic first.");
+      if (!topic) return alert("Enter a topic.");
       if (!text && !file) return alert("Type a message or attach a file.");
 
       const message = { username, timestamp: Date.now() };
       if (text) message.text = text;
-
-      const sendToDB = (msg) => {
-        db.ref(`messages/${topic}`).push(msg);
-        document.getElementById("msgInput").value = "";
-        document.getElementById("fileMedia").value = "";
-      };
 
       if (file) {
         const path = `media/${Date.now()}_${file.name}`;
@@ -141,15 +195,20 @@
         ref.put(file).then(() => ref.getDownloadURL()).then(url => {
           message.mediaUrl = url;
           message.mediaType = file.type.split('/')[0];
-          sendToDB(message);
+          db.ref(`messages/${topic}`).push(message);
         });
       } else {
-        sendToDB(message);
+        db.ref(`messages/${topic}`).push(message);
       }
+
+      document.getElementById("msgInput").value = "";
+      document.getElementById("fileMedia").value = "";
     }
 
+    document.getElementById("topicInput").addEventListener("input", loadMessages);
+
     function loadMessages() {
-      const topic = localStorage.getItem("currentTopic");
+      const topic = document.getElementById("topicInput").value.trim();
       if (!topic) return;
 
       db.ref(`messages/${topic}`).on("value", snap => {
@@ -159,12 +218,11 @@
         Object.entries(messages).sort((a, b) => a[1].timestamp - b[1].timestamp).forEach(([id, m]) => {
           const div = document.createElement("div");
           div.className = "message";
-          div.innerHTML = `<strong>${m.username}</strong>: ${m.text || ""}`;
-          if (m.mediaUrl) {
-            div.innerHTML += m.mediaType === "image"
-              ? `<img src="${m.mediaUrl}" class="attached" style="max-width: 100%; margin-top: 10px; border-radius: 5px;"/>`
-              : `<video src="${m.mediaUrl}" controls class="attached" style="max-width: 100%; margin-top: 10px; border-radius: 5px;"></video>`;
-          }
+          div.innerHTML = `
+            <strong>${m.username}</strong>: ${m.text || ""}
+            ${m.mediaUrl ? (m.mediaType === "image" ? `<img src="${m.mediaUrl}" style="max-width:100%;"/>` :
+              `<video src="${m.mediaUrl}" controls style="max-width:100%;"></video>`) : ""}
+          `;
           container.appendChild(div);
         });
       });
@@ -174,7 +232,6 @@
       displayUsername.textContent = localStorage.getItem("username") || "Anonymous";
       const pic = localStorage.getItem("profilePic");
       if (pic) document.getElementById("profilePic").src = pic;
-      loadMessages();
     };
   </script>
 </body>
