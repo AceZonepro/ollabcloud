@@ -4,28 +4,159 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>CollabCloud</title>
-  <link rel="stylesheet" href="style.css" />
-  <script defer src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
-  <script defer src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js"></script>
-  <script defer src="script.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
+    body { background: #f0f2f5; color: #000; transition: background 0.3s, color 0.3s; }
+    body.dark { background: #1e1e1e; color: #fff; }
+    header { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: #0078d4; color: white; }
+    .logo { display: flex; align-items: center; gap: 10px; }
+    .logo img { height: 40px; }
+    .profile-area { display: flex; align-items: center; gap: 10px; }
+    .profile-area img { height: 40px; width: 40px; border-radius: 50%; cursor: pointer; }
+    main { max-width: 800px; margin: 20px auto; padding: 20px; background: #fff; border-radius: 10px; }
+    body.dark main { background: #333; }
+    textarea { width: 100%; height: 100px; margin-top: 10px; padding: 10px; border-radius: 5px; border: 1px solid #ccc; }
+    input[type="file"] { margin: 10px 0; }
+    button { padding: 10px 15px; background: #0078d4; color: #fff; border: none; border-radius: 5px; cursor: pointer; }
+    .message { background: #e0ecff; margin-top: 10px; padding: 10px; border-radius: 5px; }
+    body.dark .message { background: #2a2a2a; }
+    img.attached, video.attached { max-width: 100%; margin-top: 10px; border-radius: 5px; }
+  </style>
 </head>
 <body>
   <header>
-    <h1>CollabCloud</h1>
-    <input type="text" id="nameInput" placeholder="Enter your name" />
-    <input type="file" id="profilePicInput" accept="image/*" />
-    <img id="profilePicPreview" src="" alt="Profile" />
-    <button id="toggleTheme">🌙</button>
-  </header>
-  
-  <main>
-    <textarea id="messageInput" placeholder="Write a message..."></textarea>
-    <button id="sendButton">Send</button>
-    
-    <div id="messagesContainer">
-      <h2>Messages</h2>
-      <div id="messages"></div>
+    <div class="logo">
+      <img src="logo.png" alt="CollabCloud Logo"/>
+      <h1>CollabCloud</h1>
     </div>
+    <div class="profile-area">
+      <span id="username">Anonymous</span>
+      <input type="file" id="picUpload" accept="image/*" style="display:none">
+      <img id="profilePic" src="https://via.placeholder.com/40" onclick="document.getElementById('picUpload').click()">
+      <button onclick="toggleDarkMode()">🌓</button>
+    </div>
+  </header>
+
+  <main>
+    <input type="text" id="nameInput" placeholder="Enter your name" />
+    <textarea id="msgInput" placeholder="Type a message..."></textarea>
+    <input type="file" id="mediaInput" accept="image/*,video/*">
+    <button onclick="sendMessage()">Send</button>
+    <div id="messages"></div>
   </main>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyA_OT62IGPCaueoFN7yQP1EmeR1Yem4FW8",
+      authDomain: "collabcloud-f0ed5.firebaseapp.com",
+      databaseURL: "https://collabcloud-f0ed5-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "collabcloud-f0ed5",
+      storageBucket: "collabcloud-f0ed5.appspot.com",
+      messagingSenderId: "490023921099",
+      appId: "1:490023921099:web:YOUR_APP_ID"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const storage = firebase.storage();
+
+    function loadLocal() {
+      const name = localStorage.getItem("username") || "Anonymous";
+      document.getElementById("nameInput").value = name;
+      document.getElementById("username").textContent = name;
+
+      const draft = localStorage.getItem("draft") || "";
+      document.getElementById("msgInput").value = draft;
+
+      const pic = localStorage.getItem("profilePic");
+      if (pic) document.getElementById("profilePic").src = pic;
+    }
+
+    function saveLocal() {
+      localStorage.setItem("username", document.getElementById("nameInput").value.trim() || "Anonymous");
+      localStorage.setItem("draft", document.getElementById("msgInput").value);
+    }
+
+    function toggleDarkMode() {
+      document.body.classList.toggle("dark");
+    }
+
+    document.getElementById("nameInput").addEventListener("input", e => {
+      const name = e.target.value.trim();
+      document.getElementById("username").textContent = name || "Anonymous";
+      saveLocal();
+    });
+
+    document.getElementById("msgInput").addEventListener("input", saveLocal);
+
+    document.getElementById("picUpload").addEventListener("change", e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        const img = e.target.result;
+        document.getElementById("profilePic").src = img;
+        localStorage.setItem("profilePic", img);
+      };
+      reader.readAsDataURL(file);
+    });
+
+    function sendMessage() {
+      const name = document.getElementById("nameInput").value.trim() || "Anonymous";
+      const text = document.getElementById("msgInput").value.trim();
+      const file = document.getElementById("mediaInput").files[0];
+      if (!text && !file) return;
+
+      const messageData = {
+        username: name,
+        profilePic: localStorage.getItem("profilePic"),
+        text: text,
+        timestamp: Date.now()
+      };
+
+      if (file) {
+        const ref = storage.ref("media/" + Date.now() + "_" + file.name);
+        ref.put(file).then(() => ref.getDownloadURL()).then(url => {
+          messageData.mediaUrl = url;
+          messageData.mediaType = file.type.split('/')[0];
+          db.ref("messages").push(messageData);
+        });
+      } else {
+        db.ref("messages").push(messageData);
+      }
+
+      document.getElementById("msgInput").value = "";
+      document.getElementById("mediaInput").value = "";
+      saveLocal();
+    }
+
+    function loadMessages() {
+      db.ref("messages").on("value", snapshot => {
+        const messages = snapshot.val() || {};
+        const container = document.getElementById("messages");
+        container.innerHTML = "";
+        Object.values(messages).sort((a, b) => a.timestamp - b.timestamp).forEach(msg => {
+          const div = document.createElement("div");
+          div.className = "message";
+          div.innerHTML = `
+            <strong><img src="${msg.profilePic || 'https://via.placeholder.com/30'}" style="height:30px;width:30px;border-radius:50%;vertical-align:middle;margin-right:5px;">${msg.username}</strong><br/>
+            ${msg.text || ""}
+            ${msg.mediaUrl ? (msg.mediaType === "image"
+              ? `<img src="${msg.mediaUrl}" class="attached">`
+              : `<video src="${msg.mediaUrl}" class="attached" controls></video>`) : ""}
+          `;
+          container.appendChild(div);
+        });
+      });
+    }
+
+    window.onload = () => {
+      loadLocal();
+      loadMessages();
+    };
+  </script>
 </body>
 </html>
