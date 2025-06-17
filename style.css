@@ -1,66 +1,61 @@
 body {
-  font-family: Arial, sans-serif;
-  background-color: #f3f3f3;
   margin: 0;
-  padding: 0;
+  font-family: Arial, sans-serif;
+  background: #f4f4f4;
+  color: #000;
   transition: background 0.3s, color 0.3s;
 }
 
-.dark-mode {
-  background-color: #121212;
-  color: #fff;
+body.dark {
+  background: #121212;
+  color: #eee;
 }
 
 header {
-  background-color: #0072ce;
-  padding: 10px 20px;
-  color: white;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 10px 20px;
+  background-color: #0073e6;
+  color: white;
 }
 
-main {
-  padding: 20px;
-  max-width: 700px;
-  margin: auto;
+header input {
+  padding: 6px;
+  border-radius: 5px;
+  border: none;
 }
 
-form {
+.chat-container {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  margin: 20px;
 }
 
-input, textarea, button {
+textarea {
+  width: 100%;
+  height: 60px;
   padding: 10px;
-  font-size: 16px;
 }
 
-button {
-  background-color: #0072ce;
-  color: white;
-  border: none;
-  cursor: pointer;
+#messages {
+  margin: 20px;
 }
 
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-
-li {
-  background: white;
-  margin: 10px 0;
+.message {
+  background: #fff;
+  margin-bottom: 10px;
   padding: 10px;
   border-radius: 5px;
 }
 
-.dark-mode li {
-  background: #1e1e1e;
+body.dark .message {
+  background: #1f1f1f;
 }
 
-img, video {
-  max-width: 100%;
-  height: auto;
+img.uploaded-file {
+  max-width: 200px;
+  display: block;
+  margin-top: 5px;
 }
