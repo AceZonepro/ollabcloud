@@ -2,44 +2,29 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>CollabCloud</title>
   <link rel="stylesheet" href="style.css" />
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1"></script>
 </head>
 <body>
   <header>
     <h1>CollabCloud</h1>
-    <input type="text" id="username" placeholder="Enter your name" />
+    <input type="text" id="usernameInput" placeholder="Enter your name" />
     <button id="toggleTheme">🌙</button>
   </header>
 
   <main>
-    <div class="search">
-      <input type="text" id="searchBox" placeholder="Search by topic or user..." />
+    <div class="chat-container">
+      <textarea id="messageInput" placeholder="Write a message..."></textarea>
+      <input type="file" id="fileInput" />
+      <button onclick="sendMessage()">Send</button>
     </div>
 
-    <form id="messageForm">
-      <input type="text" id="topic" placeholder="Topic (optional)" />
-      <textarea id="messageInput" placeholder="Write a message..." required></textarea>
-      <input type="file" id="fileInput" accept="image/*,video/*" />
-      <emoji-picker id="emojiPicker"></emoji-picker>
-      <button type="submit">Send</button>
-    </form>
-
-    <section id="pinned">
-      <h2>Pinned Messages</h2>
-      <ul id="pinnedMessages"></ul>
-    </section>
-
-    <section id="messages">
-      <h2>All Messages</h2>
-      <ul id="messageList"></ul>
-    </section>
+    <section id="messages"></section>
   </main>
 
-  <script src="script.js" type="module"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
