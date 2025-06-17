@@ -1,50 +1,72 @@
-// Firebase Config
+// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyA_OT62IGPCaueoFN7yQP1EmeR1Yem4FW8",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  databaseURL: "YOUR_DATABASE_URL",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_ID",
+  authDomain: "collabcloud.firebaseapp.com",
+  databaseURL: "https://collabcloud-default-rtdb.firebaseio.com",
+  projectId: "collabcloud",
+  storageBucket: "collabcloud.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
   appId: "YOUR_APP_ID"
 };
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-const usernameInput = document.getElementById("username");
-const messageForm = document.getElementById("messageForm");
-const topicInput = document.getElementById("topic");
-const messageInput = document.getElementById("messageInput");
-const fileInput = document.getElementById("fileInput");
-const messageList = document.getElementById("messageList");
-const pinnedMessages = document.getElementById("pinnedMessages");
-const searchBox = document.getElementById("searchBox");
-const emojiPicker = document.getElementById("emojiPicker");
+const messageInput = document.getElementById('messageInput');
+const usernameInput = document.getElementById('usernameInput');
+const fileInput = document.getElementById('fileInput');
+const messagesDiv = document.getElementById('messages');
 
-// Dark Mode
-document.getElementById("toggleTheme").addEventListener("click", () => {
-  document.body.classList.toggle("dark-mode");
-});
+// Theme toggle
+document.getElementById('toggleTheme').onclick = () => {
+  document.body.classList.toggle('dark');
+};
 
-// Emoji Picker
-emojiPicker.addEventListener("emoji-click", e => {
-  messageInput.value += e.detail.unicode;
-});
+function sendMessage() {
+  const text = messageInput.value.trim();
+  const user = usernameInput.value.trim();
 
-// Send Message
-messageForm.addEventListener("submit", async e => {
-  e.preventDefault();
-  const name = usernameInput.value.trim() || "Anonymous";
-  const message = messageInput.value.trim();
-  const topic = topicInput.value.trim();
+  if (!user || !text) return alert("Enter your name and message");
+
   const file = fileInput.files[0];
-  let mediaURL = "";
+  const reader = new FileReader();
+
+  const newMessage = {
+    user,
+    text,
+    timestamp: Date.now()
+  };
 
   if (file) {
-    const reader = new FileReader();
-    reader.onload = () => {
-      mediaURL = reader.result;
-      sendToFirebase({ name, message, topic, mediaURL });
+    reader.onload = function (e) {
+      newMessage.file = e.target.result;
+      db.ref("messages").push(newMessage);
     };
-    r
+    reader.readAsDataURL(file);
+  } else {
+    db.ref("messages").push(newMessage);
+  }
+
+  messageInput.value = '';
+  fileInput.value = '';
+}
+
+function renderMessage(data) {
+  const msg = data.val();
+  const msgDiv = document.createElement('div');
+  msgDiv.className = 'message';
+  msgDiv.innerHTML = `<strong>${msg.user}</strong>: ${msg.text}`;
+  if (msg.file) {
+    const isImage = msg.file.startsWith("data:image");
+    const isVideo = msg.file.startsWith("data:video");
+    if (isImage) {
+      msgDiv.innerHTML += `<img class="uploaded-file" src="${msg.file}" />`;
+    } else if (isVideo) {
+      msgDiv.innerHTML += `<video controls width="200"><source src="${msg.file}"></video>`;
+    }
+  }
+  messagesDiv.appendChild(msgDiv);
+}
+
+// Listen for new messages
+db.ref("messages").on("child_added", renderMessage);
