@@ -1,210 +1,66 @@
-* {
-  box-sizing: border-box;
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f3f3f3;
   margin: 0;
   padding: 0;
-  font-family: Arial, sans-serif;
+  transition: background 0.3s, color 0.3s;
 }
 
-body {
-  background-color: #f0f2f5;
-  color: #333;
+.dark-mode {
+  background-color: #121212;
+  color: #fff;
 }
 
 header {
+  background-color: #0072ce;
+  padding: 10px 20px;
+  color: white;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #0078d4;
-  padding: 10px 20px;
-  color: white;
-}
-
-.logo {
-  display: flex;
-  align-items: center;
-}
-
-.logo img {
-  height: 40px;
-  margin-right: 10px;
-}
-
-.profile-area {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.profile-area img {
-  height: 40px;
-  width: 40px;
-  border-radius: 50%;
-  object-fit: cover;
-  cursor: pointer;
-}
-
-.menu {
-  position: relative;
-}
-
-.menu-btn {
-  font-size: 24px;
-  background: none;
-  border: none;
-  color: white;
-  cursor: pointer;
-}
-
-.dropdown {
-  display: none;
-  flex-direction: column;
-  position: absolute;
-  top: 50px;
-  right: 0;
-  width: 250px;
-  background-color: white;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  padding: 15px;
-  z-index: 1000;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-.dropdown input[type="text"] {
-  padding: 8px;
-  margin-bottom: 10px;
-  width: 100%;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-.dropdown button {
-  padding: 8px;
-  background-color: #0078d4;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
 }
 
 main {
   padding: 20px;
+  max-width: 700px;
+  margin: auto;
 }
 
-.message-container {
-  background-color: white;
-  border-radius: 10px;
-  padding: 20px;
-  max-width: 900px;
-  margin: 0 auto;
-  height: calc(100vh - 100px);
-  overflow-y: auto;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
-
-.message-container input,
-.message-container textarea {
-  width: 100%;
-  padding: 12px;
-  margin-bottom: 12px;
-  font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-}
-
-.message-container button {
-  padding: 10px 20px;
-  background-color: #0078d4;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background-color 0.2s ease-in-out;
-}
-
-.message-container button:hover {
-  background-color: #005fa3;
-}
-
-.links {
-  margin-top: 20px;
+form {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 10px;
 }
 
-.links a {
-  color: #0078d4;
-  text-decoration: none;
-  font-weight: bold;
-  transition: color 0.2s;
+input, textarea, button {
+  padding: 10px;
+  font-size: 16px;
 }
 
-.links a:hover {
-  color: #005fa3;
-}
-
-.message-list {
-  margin-top: 20px;
-}
-
-.message-item {
-  background-color: #eef6ff;
-  padding: 12px;
-  border-radius: 6px;
-  margin-bottom: 10px;
-  border: 1px solid #cde3ff;
-}
-
-.darkmode-toggle {
-  font-size: 18px;
-  background: none;
-  border: none;
+button {
+  background-color: #0072ce;
   color: white;
+  border: none;
   cursor: pointer;
-  margin-left: 10px;
 }
 
-body.dark-mode {
-  background-color: #18191a;
-  color: #e4e6eb;
+ul {
+  list-style-type: none;
+  padding: 0;
 }
 
-body.dark-mode header {
-  background-color: #242526;
-  color: #e4e6eb;
+li {
+  background: white;
+  margin: 10px 0;
+  padding: 10px;
+  border-radius: 5px;
 }
 
-body.dark-mode .dropdown {
-  background-color: #3a3b3c;
-  color: #e4e6eb;
-  border-color: #555;
+.dark-mode li {
+  background: #1e1e1e;
 }
 
-body.dark-mode .message-container {
-  background-color: #242526;
-  color: #e4e6eb;
-  box-shadow: none;
+img, video {
+  max-width: 100%;
+  height: auto;
 }
-
-body.dark-mode input,
-body.dark-mode textarea {
-  background-color: #3a3b3c;
-  color: #e4e6eb;
-  border: 1px solid #555;
-}
-
-body.dark-mode .message-item {
-  background-color: #3a3b3c;
-  border-color: #555;
-}
-
-body.dark-mode .message-container button,
-body.dark-mode .dropdown button {
-  background-color: #4a90e2;
-}
-
-body.dark-mode .links a {
-  color: #4a90e2;
-}
-
